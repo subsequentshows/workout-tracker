@@ -777,6 +777,33 @@
       appearance: textfield;
     }
 
+    #work-out-note table {
+      border-collapse: separate;
+      border-spacing: 0 6px;
+    }
+
+    #work-out-note thead {
+      display: table-header-group;
+
+    }
+
+    #work-out-note tbody tr:first-child td {
+      padding-top: 23px;
+    }
+
+    #work-out-note tbody tr {
+      border: 1px solid var(--border2);
+      border-radius: 6px;
+    }
+
+    #work-out-note tbody td:first-child {
+      border-radius: 6px 0 0 6px;
+    }
+
+    #work-out-note tbody td:last-child {
+      border-radius: 0 6px 6px 0;
+    }
+
     @media (max-width: 600px) {
       .header {
         display: block;
@@ -835,6 +862,65 @@
 
     <div class="day-tabs" id="dayTabs"></div>
     <div id="dayContent"></div>
+
+    <div id="work-out-note">
+      <table>
+        <thead>
+          <tr>
+            <th>Nhóm cơ</th>
+            <th>Push</th>
+            <th>Pull</th>
+          </tr>
+        </thead>
+        <tbody style="margin-top: 15px;">
+          <tr>
+            <td>Ngực (Pectoralis)</td>
+            <td>Bench Press, Incline Press</td>
+            <td style="text-align: center;">—</td>
+          </tr>
+          <tr>
+            <td>Vai trước (Anterior deltoid)</td>
+            <td>OHP, Incline Press, Bench Press</td>
+            <td style="text-align: center;">—</td>
+          </tr>
+          <tr>
+            <td>Vai giữa (Lateral deltoid)</td>
+            <td>OHP</td>
+            <td style="text-align: center;">—</td>
+          </tr>
+          <tr>
+            <td>Tay sau (Triceps)</td>
+            <td>Bench Press, Incline Press, OHP</td>
+            <td style="text-align: center;">—</td>
+          </tr>
+          <tr>
+            <td>Lưng rộng (Latissimus dorsi)</td>
+            <td style="text-align: center;">—</td>
+            <td>Pull-up, Lat Pulldown, Row</td>
+          </tr>
+          <tr>
+            <td>Lưng giữa (Rhomboids / Mid traps)</td>
+            <td style="text-align: center;">—</td>
+            <td>Barbell Row, Cable Row</td>
+          </tr>
+          <tr>
+            <td>Lưng dưới (Erector spinae)</td>
+            <td style="text-align: center;">—</td>
+            <td>Deadlift</td>
+          </tr>
+          <tr>
+            <td>Mông + Đùi sau (Glutes / Hamstrings)</td>
+            <td style="text-align: center;">—</td>
+            <td>Deadlift</td>
+          </tr>
+          <tr>
+            <td>Tay trước (Biceps)</td>
+            <td style="text-align: center;">—</td>
+            <td>Pull-up, Row, Cable Row</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 
   <!-- TOAST -->
@@ -962,9 +1048,9 @@
       {
         id: 'push', label: 'Push', sub: 'T2', color: 'push',
         exercises: [
-          { id: 'bench', name: 'Barbell Bench Press', type: 'comp', schema: '4×5–8', sets: 4, note: 'Bài chính. Tăng tạ khi đủ reps tất cả sets.' },
-          { id: 'incline', name: 'Incline DB Press', type: 'comp', schema: '3×8–12', sets: 3, note: '30–45°. Nhắm upper chest.' },
-          { id: 'ohp', name: 'Overhead Press', type: 'comp', schema: '3×8–10', sets: 3, note: 'Barbell hoặc DB đứng/ngồi.' },
+          { id: 'bench', name: 'Barbell Bench Press', type: 'comp', schema: '4×5–8', sets: 4, note: 'Chính: Pectoralis major (ngực giữa và dưới). Phụ: Anterior deltoid (vai trước), Triceps brachii.Ổn định: Serratus anterior, Rotator cuff.' },
+          { id: 'incline', name: 'Incline DB Press', type: 'comp', schema: '3×8–12', sets: 3, note: '30–45°. Nhắm upper chest. Chính: Pectoralis major phần upper (clavicular head). Phụ: Anterior deltoid, Triceps. Góc 30–45° càng cao thì vai trước tham gia càng nhiều, ngực càng ít' },
+          { id: 'ohp', name: 'Overhead Press', type: 'comp', schema: '3×8–10', sets: 3, note: 'Barbell hoặc DB đứng/ngồi. Chính: Deltoid (cả 3 đầu, nhưng anterior và lateral chủ yếu). Phụ: Triceps, Upper trapezius, Serratus anterior. Ổn định: Rotator cuff, Core (đứng)' },
           { id: 'lateral', name: 'Lateral Raise', type: 'iso', schema: '3×12–15', sets: 3, note: 'Tạ đơn nhẹ, giữ 1 giây ở trên.' },
           { id: 'fly', name: 'Cable/DB Fly', type: 'iso', schema: '3×12–15', sets: 3, note: 'Kéo căng ở đáy chuyển động.' },
           { id: 'pushdown', name: 'Tricep Pushdown', type: 'iso', schema: '3×10–15', sets: 3, note: 'Cable hoặc dây kháng lực.' },
@@ -974,10 +1060,10 @@
       {
         id: 'pull', label: 'Pull', sub: 'T4', color: 'pull',
         exercises: [
-          { id: 'deadlift', name: 'Deadlift', type: 'comp', schema: '3×4–6', sets: 3, note: 'Conventional hoặc Romanian. Warm-up kỹ.' },
-          { id: 'pullup', name: 'Pull-up / Lat Pulldown', type: 'comp', schema: '4×6–10', sets: 4, note: 'Pull-up nếu được; thêm tạ khi ≥12 reps.' },
-          { id: 'bbrow', name: 'Barbell Row', type: 'comp', schema: '3×8–10', sets: 3, note: 'Kiểm soát trọng tâm, không swing.' },
-          { id: 'cablerow', name: 'Seated Cable Row', type: 'comp', schema: '3×10–12', sets: 3, note: 'Kéo về rốn, giữ 1 giây.' },
+          { id: 'deadlift', name: 'Deadlift', type: 'comp', schema: '3×4–6', sets: 3, note: 'Conventional hoặc Romanian. Warm-up kỹ. Chính: Erector spinae (dựng cột sống), Gluteus maximus, Hamstrings. Phụ: Quadriceps, Latissimus dorsi, Trapezius (upper + mid), Rhomboids. Ổn định: Core toàn bộ, Forearm/grip. Lưu ý: Đây là bài full-body thực sự, không thuần pull — lý do đặt trong Pull day vì lưng là nhóm cơ chủ yếu' },
+          { id: 'pullup', name: 'Pull-up / Lat Pulldown', type: 'comp', schema: '4×6–10', sets: 4, note: 'Pull-up nếu được; thêm tạ khi ≥12 reps. Chính: Latissimus dorsi (cánh lưng — tạo hình V). Phụ: Biceps brachii, Brachialis, Teres major. Ổn định: Rhomboids, Rear deltoid, Core' },
+          { id: 'bbrow', name: 'Barbell Row', type: 'comp', schema: '3×8–10', sets: 3, note: 'Kiểm soát trọng tâm, không swing. Chính: Latissimus dorsi, Rhomboids, Middle trapezius. Phụ: Biceps, Rear deltoid, Erector spinae (giữ tư thế). So với Pulldown: Row kích thích mid-back (rhomboids, traps) nhiều hơn, Pulldown kích thích lat nhiều hơn.' },
+          { id: 'cablerow', name: 'Seated Cable Row', type: 'comp', schema: '3×10–12', sets: 3, note: 'Kéo về rốn, giữ 1 giây. Chính: Rhomboids, Middle trapezius, Latissimus dorsi. Phụ: Biceps, Rear deltoid. Tư thế ngồi cố định cho phép cô lập mid-back tốt hơn Barbell Row.' },
           { id: 'facepull', name: 'Face Pull', type: 'iso', schema: '3×15–20', sets: 3, note: 'Quan trọng cho sức khỏe vai.' },
           { id: 'dbcurl', name: 'DB Hammer Curl', type: 'iso', schema: '3×10–12', sets: 3, note: 'Alternating hoặc hammer.' },
           { id: 'ezbarwidecurl', name: 'EZ Bar Wide Curl', type: 'iso', schema: '3×10–12', sets: 3, note: 'Grip rộng nhắm long head.' },
@@ -1021,7 +1107,6 @@
        STATE
        ===================================================== */
     let currentWeek = getThisWeek();
-    let currentMonth = getCurrentMonthYear();
     let currentDay = 'push';
     let dayData = {};  // { exId: { weight, reps:[n,...], done:bool } }
     let prevData = {};
@@ -1034,9 +1119,11 @@
       return Math.ceil(((now - jan1) / 86400000 + jan1.getDay() + 1) / 7);
     }
 
-    function getCurrentMonthYear() {
-      const now = new Date();
-      return { month: now.getMonth() + 1, year: now.getFullYear() };
+    function getMonthFromWeek(week) {
+      const year = new Date().getFullYear();
+      const jan1 = new Date(year, 0, 1);
+      const date = new Date(jan1.getTime() + (week - 1) * 7 * 86400000);
+      return { month: date.getMonth() + 1, year: date.getFullYear() };
     }
 
     function weekLabel(w) { return `W${w} / ${new Date().getFullYear()}`; }
@@ -1120,8 +1207,10 @@
     }
 
     function updateWeekUI() {
+      const m = getMonthFromWeek(currentWeek);
+      console.log(m);
       document.getElementById('weekLabel').textContent = weekLabel(currentWeek);
-      document.getElementById('headerWeek').textContent = `Tuần ${currentWeek} ( Tháng ${currentMonth.month}/${currentMonth.year} )`;
+      document.getElementById('headerWeek').textContent = `Tuần ${currentWeek} ( Tháng ${m.month}/${m.year} )`;
     }
 
     function switchDay(id) {
