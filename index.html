@@ -1,0 +1,1186 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Workout Tracker</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap');
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg: #0f0f0f;
+      --surface: #181818;
+      --surface2: #222222;
+      --border: #2a2a2a;
+      --border2: #333;
+      --text: #e8e8e8;
+      --muted: #FFF;
+      --hint: #f3f3f3;
+      --push: #a78bfa;
+      --push-dim: #3b2f6b;
+      --pull: #34d399;
+      --pull-dim: #1a3d30;
+      --legs: #fb923c;
+      --legs-dim: #3d2010;
+      --upper: #60a5fa;
+      --upper-dim: #1a2f4a;
+      --success: #34d399;
+      --success-dim: #0d2a20;
+      --warn: #fbbf24;
+      --warn-dim: #2d2000;
+      --mono: 'DM Mono', monospace;
+      --sans: 'DM Sans', sans-serif;
+    }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    span {
+      color: #fff;
+    }
+
+    .app {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 0 0 80px;
+    }
+
+    /* Header */
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .header-title {
+      font-family: var(--mono);
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: .04em;
+      color: var(--text);
+    }
+
+    .header-week {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .week-nav {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .week-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      border: 1px solid var(--border2);
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all .15s;
+    }
+
+    .week-btn:hover {
+      border-color: var(--text);
+      color: var(--text);
+    }
+
+    .week-label {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--text);
+      min-width: 52px;
+      text-align: center;
+    }
+
+    /* Day tabs */
+    .day-tabs {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid var(--border);
+      padding: 0 20px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .day-tabs::-webkit-scrollbar {
+      display: none;
+    }
+
+    .day-tab {
+      padding: 10px 16px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--muted);
+      border: none;
+      background: transparent;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all .15s;
+      font-family: var(--sans);
+    }
+
+    .day-tab:hover {
+      color: var(--text);
+    }
+
+    .day-tab.active-push {
+      color: var(--push);
+      border-bottom-color: var(--push);
+    }
+
+    .day-tab.active-pull {
+      color: var(--pull);
+      border-bottom-color: var(--pull);
+    }
+
+    .day-tab.active-legs {
+      color: var(--legs);
+      border-bottom-color: var(--legs);
+    }
+
+    .day-tab.active-upper {
+      color: var(--upper);
+      border-bottom-color: var(--upper);
+    }
+
+    /* Day panel */
+    .day-panel {
+      padding: 16px 20px;
+    }
+
+    .day-summary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+
+    .day-progress-text {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .progress-bar-wrap {
+      width: 100px;
+      height: 3px;
+      background: var(--border2);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      border-radius: 2px;
+      transition: width .3s;
+    }
+
+    /* Exercise card */
+    .ex-card {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      margin-bottom: 8px;
+      overflow: hidden;
+      transition: border-color .15s;
+    }
+
+    .ex-card.completed {
+      border-color: var(--border2);
+    }
+
+    .ex-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 11px 14px;
+      cursor: pointer;
+      background: var(--surface);
+      user-select: none;
+    }
+
+    .ex-header:hover {
+      background: var(--surface2);
+    }
+
+    .ex-check {
+      width: 18px;
+      height: 18px;
+      border-radius: 5px;
+      border: 1.5px solid var(--border2);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all .15s;
+    }
+
+    .ex-check svg {
+      display: none;
+    }
+
+    .completed .ex-check {
+      border-color: var(--success);
+      background: var(--success);
+    }
+
+    .completed .ex-check svg {
+      display: block;
+    }
+
+    .ex-name {
+      font-weight: 500;
+      font-size: 13px;
+      flex: 1;
+    }
+
+    .completed .ex-name {
+      color: var(--muted);
+      text-decoration: line-through;
+      text-decoration-color: var(--border2);
+    }
+
+    .ex-type {
+      font-family: var(--mono);
+      font-size: 10px;
+      padding: 2px 7px;
+      border-radius: 4px;
+    }
+
+    .type-comp {
+      background: var(--push-dim);
+      color: var(--push);
+    }
+
+    .type-iso {
+      background: var(--surface2);
+      color: var(--muted);
+    }
+
+    .ex-schema {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--hint);
+      margin-left: 4px;
+      white-space: nowrap;
+    }
+
+    .ex-chevron {
+      font-size: 12px;
+      color: var(--hint);
+      transition: transform .2s;
+    }
+
+    .ex-card.open .ex-chevron {
+      transform: rotate(180deg);
+    }
+
+    /* Sets body */
+    .ex-body {
+      display: none;
+      padding: 12px 14px 14px;
+      border-top: 1px solid var(--border);
+    }
+
+    .ex-card.open .ex-body {
+      display: block;
+    }
+
+    .weight-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .weight-label {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .weight-input {
+      font-family: var(--mono);
+      font-size: 13px;
+      font-weight: 500;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      color: var(--text);
+      border-radius: 6px;
+      padding: 4px 8px;
+      width: 80px;
+      text-align: center;
+    }
+
+    .weight-input:focus {
+      outline: none;
+      border-color: var(--muted);
+    }
+
+    .weight-unit {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .weight-prev {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--hint);
+      margin-left: 4px;
+    }
+
+    .sets-grid {
+      display: grid;
+      gap: 6px;
+    }
+
+    .sets-header {
+      display: grid;
+      grid-template-columns: 36px repeat(var(--cols), 1fr);
+      gap: 6px;
+      margin-bottom: 4px;
+    }
+
+    .set-col-label {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--hint);
+      text-align: center;
+    }
+
+    .set-row {
+      display: grid;
+      grid-template-columns: 36px repeat(var(--cols), 1fr);
+      gap: 6px;
+      align-items: center;
+    }
+
+    .set-row-label {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .rep-input {
+      font-family: var(--mono);
+      font-size: 13px;
+      font-weight: 500;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 6px;
+      padding: 5px 4px;
+      text-align: center;
+      width: 100%;
+      transition: border-color .15s, background .15s;
+    }
+
+    .rep-input:focus {
+      outline: none;
+      border-color: var(--muted);
+      background: var(--surface);
+    }
+
+    .rep-input.has-val {
+      border-color: var(--border2);
+      background: var(--surface);
+    }
+
+    .prev-row-label {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--hint);
+    }
+
+    .prev-val {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--hint);
+      text-align: center;
+      padding: 4px 0;
+    }
+
+    .prev-val.higher {
+      color: var(--success);
+    }
+
+    .prev-val.lower {
+      color: var(--legs);
+    }
+
+    .po-hint {
+      margin-top: 10px;
+      padding: 8px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      display: none;
+    }
+
+    .po-hint.show {
+      display: block;
+    }
+
+    .po-hint.great {
+      background: var(--success-dim);
+      color: var(--success);
+    }
+
+    .po-hint.almost {
+      background: var(--warn-dim);
+      color: var(--warn);
+    }
+
+    .po-hint.increase {
+      background: var(--pull-dim);
+      color: var(--pull);
+    }
+
+    .ex-note {
+      margin-top: 8px;
+      font-size: 11px;
+      color: var(--hint);
+      font-style: italic;
+    }
+
+    /* History panel */
+    .history-btn {
+      width: 100%;
+      margin-top: 20px;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px dashed var(--border2);
+      background: transparent;
+      color: var(--muted);
+      font-size: 12px;
+      font-family: var(--sans);
+      cursor: pointer;
+      transition: all .15s;
+    }
+
+    .history-btn:hover {
+      border-color: var(--muted);
+      color: var(--text);
+    }
+
+    .history-panel {
+      margin-top: 12px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      display: none;
+    }
+
+    .history-panel.open {
+      display: block;
+    }
+
+    .history-header {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+    }
+
+    .history-title {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .history-body {
+      padding: 10px 14px;
+    }
+
+    .history-ex {
+      margin-bottom: 14px;
+    }
+
+    .history-ex:last-child {
+      margin-bottom: 0;
+    }
+
+    .history-ex-name {
+      font-size: 12px;
+      font-weight: 500;
+      margin-bottom: 6px;
+      color: var(--text);
+    }
+
+    .history-week-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 5px 0;
+      border-bottom: 1px solid var(--border);
+      font-family: var(--mono);
+      font-size: 11px;
+    }
+
+    .history-week-row:last-child {
+      border-bottom: none;
+    }
+
+    .hw-label {
+      color: var(--muted);
+    }
+
+    .hw-val {
+      color: var(--text);
+    }
+
+    .hw-delta {
+      font-size: 10px;
+      padding: 1px 6px;
+      border-radius: 3px;
+    }
+
+    .hw-delta.up {
+      background: var(--success-dim);
+      color: var(--success);
+    }
+
+    .hw-delta.same {
+      background: var(--surface2);
+      color: var(--hint);
+    }
+
+    /* Empty state */
+    .empty-history {
+      font-size: 12px;
+      color: var(--hint);
+      text-align: center;
+      padding: 20px 0;
+      font-style: italic;
+    }
+
+    /* CF badge */
+    .cf-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-family: var(--mono);
+      font-size: 10px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      background: var(--surface2);
+      color: var(--hint);
+      border: 1px solid var(--border);
+    }
+
+    .cf-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--hint);
+    }
+
+    .cf-dot.local {
+      background: var(--warn);
+    }
+
+    .cf-dot.remote {
+      background: var(--success);
+    }
+
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+    }
+
+    input[type=number] {
+      -moz-appearance: textfield;
+      appearance: textfield;
+    }
+
+    @media (max-width: 600px) {
+      .header {
+        display: block;
+      }
+
+      .header .header-btn {
+        justify-content: space-between;
+        margin-bottom: 15px;
+      }
+
+      .day-tabs {
+        justify-content: space-between;
+      }
+
+      .header-wrapper {
+        flex-direction: column;
+        gap: 15px;
+      }
+
+      .header-wrapper .cf-badge {
+        align-self: flex-end;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+
+    <div class="header">
+      <div>
+        <div class="header-title">Workout Tracker</div>
+        <div class="header-week" id="headerWeek"></div>
+        <div class="header-btn"
+          style="font-size:10px;color:var(--hint);margin-top:3px;display:flex;gap:6px;align-items:center;">
+          <span>ID: <span id="userIdDisplay" style="font-family:var(--mono);cursor:pointer;" title=""></span></span>
+          <div>
+            <button onclick="copyUserId()"
+              style="font-size: 12px;background: none;border: 2px solid var(--push);color: #fff;cursor:pointer;padding: 5px 10px;">Copy</button>
+            <button onclick="changeUserId()"
+              style="font-size: 12px;background: none;border: 2px solid var(--push);color: #fff;cursor:pointer;padding: 5px 10px; margin-left: 10px;">Đổi
+              ID</button>
+          </div>
+        </div>
+      </div>
+      <div class="header-wrapper" style="display:flex;align-items:center;gap:12px;">
+        <span class="cf-badge" id="storageBadge">
+          <span class="cf-dot local" id="storageDot"></span>
+          <span id="storageLabel" style="color: #fff;">localStorage</span>
+        </span>
+        <div class="week-nav">
+          <button class="week-btn" onclick="changeWeek(-1)">&#8592;</button>
+          <span class="week-label" id="weekLabel"></span>
+          <button class="week-btn" onclick="changeWeek(1)">&#8594;</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="day-tabs" id="dayTabs"></div>
+    <div id="dayContent"></div>
+
+  </div>
+
+
+
+  <script>
+    /* =====================================================
+       STORAGE LAYER — swap này để chuyển sang CF Worker
+       ===================================================== */
+    const Storage = {
+      _workerUrl: 'https://workout-tracker.vuhuuvan-kc.workers.dev',
+
+      _userId: null,
+
+      initUser() {
+        let id = localStorage.getItem('ppl:userId');
+        if (!id) {
+          id = crypto.randomUUID();
+          localStorage.setItem('ppl:userId', id);
+        }
+        this._userId = id;
+        renderUserId();
+      },
+
+      setUser(id) {
+        this._userId = id;
+        localStorage.setItem('ppl:userId', id);
+        renderUserId();
+        loadDay();
+      },
+
+      _key(weekKey, day) {
+        return `ppl:${this._userId}:${weekKey}:${day}`;
+      },
+
+      async get(weekKey, day) {
+        const k = this._key(weekKey, day);
+        if (this._workerUrl) {
+          try {
+            const r = await fetch(`${this._workerUrl}/data?key=${encodeURIComponent(k)}`);
+            return await r.json();
+          } catch { return null; }
+        }
+        const raw = localStorage.getItem(k);
+        return raw ? JSON.parse(raw) : null;
+      },
+
+      async set(weekKey, day, data) {
+        const k = this._key(weekKey, day);
+        if (this._workerUrl) {
+          try {
+            await fetch(`${this._workerUrl}/data`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ key: k, value: data })
+            });
+          } catch { }
+          return;
+        }
+        localStorage.setItem(k, JSON.stringify(data));
+      },
+
+      isRemote() { return !!this._workerUrl; }
+    };
+    /* =====================================================
+       DỮ LIỆU BÀI TẬP
+       ===================================================== */
+    const DAYS = [
+      {
+        id: 'push', label: 'Push', sub: 'T2', color: 'push',
+        exercises: [
+          { id: 'bench', name: 'Barbell Bench Press', type: 'comp', schema: '4×5–8', sets: 4, note: 'Bài chính. Tăng tạ khi đủ reps tất cả sets.' },
+          { id: 'incline', name: 'Incline DB Press', type: 'comp', schema: '3×8–12', sets: 3, note: '30–45°. Nhắm upper chest.' },
+          { id: 'ohp', name: 'Overhead Press', type: 'comp', schema: '3×8–10', sets: 3, note: 'Barbell hoặc DB đứng/ngồi.' },
+          { id: 'lateral', name: 'Lateral Raise', type: 'iso', schema: '3×12–15', sets: 3, note: 'Tạ đơn nhẹ, giữ 1 giây ở trên.' },
+          { id: 'fly', name: 'Cable/DB Fly', type: 'iso', schema: '3×12–15', sets: 3, note: 'Kéo căng ở đáy chuyển động.' },
+          { id: 'pushdown', name: 'Tricep Pushdown', type: 'iso', schema: '3×10–15', sets: 3, note: 'Cable hoặc dây kháng lực.' },
+          { id: 'triext', name: 'Overhead Tricep Ext.', type: 'iso', schema: '2×12–15', sets: 2, note: 'DB một tay hoặc hai tay.' },
+        ]
+      },
+      {
+        id: 'pull', label: 'Pull', sub: 'T4', color: 'pull',
+        exercises: [
+          { id: 'deadlift', name: 'Deadlift', type: 'comp', schema: '3×4–6', sets: 3, note: 'Conventional hoặc Romanian. Warm-up kỹ.' },
+          { id: 'pullup', name: 'Pull-up / Lat Pulldown', type: 'comp', schema: '4×6–10', sets: 4, note: 'Pull-up nếu được; thêm tạ khi ≥12 reps.' },
+          { id: 'bbrow', name: 'Barbell Row', type: 'comp', schema: '3×8–10', sets: 3, note: 'Kiểm soát trọng tâm, không swing.' },
+          { id: 'cablerow', name: 'Seated Cable Row', type: 'comp', schema: '3×10–12', sets: 3, note: 'Kéo về rốn, giữ 1 giây.' },
+          { id: 'facepull', name: 'Face Pull', type: 'iso', schema: '3×15–20', sets: 3, note: 'Quan trọng cho sức khỏe vai.' },
+          { id: 'dbcurl', name: 'DB Hammer Curl', type: 'iso', schema: '3×10–12', sets: 3, note: 'Alternating hoặc hammer.' },
+          { id: 'ezbarwidecurl', name: 'EZ Bar Wide Curl', type: 'iso', schema: '3×10–12', sets: 3, note: 'Grip rộng nhắm long head.' },
+          { id: 'ezbarnarrowcurl', name: 'EZ Bar Narrow Curl', type: 'iso', schema: '3×8–10', sets: 3, note: 'Grip hẹp nhắm short head.' },
+          { id: 'preacher', name: 'Preacher Curl(EZ Bar, DB)', type: 'iso', schema: '3×10–12', sets: 3, note: 'Khuỷu tay cố định, không swing. Full ROM.' },
+          // Cẳng tay
+          { id: 'revcurl', name: 'Reverse EZ Bar Curl', type: 'iso', schema: '3×12–15', sets: 3, note: 'Overhand grip. Brachioradialis + forearm extensors.' },
+          { id: 'wristcurl', name: 'DB Wrist Curl', type: 'iso', schema: '3×15–20', sets: 3, note: 'Ngồi, cẳng tay tựa đùi, cổ tay gập xuống hết ROM.' },
+          { id: 'revwrist', name: 'DB Reverse Wrist Curl', type: 'iso', schema: '3×15–20', sets: 3, note: 'Ngược lại wrist curl, nhắm forearm extensors.' },
+          { id: 'farmer', name: "Farmer's Carry", type: 'iso', schema: '3×30s', sets: 3, note: 'Tạ nặng, đi thẳng lưng. Grip + forearm tổng thể.' },
+        ]
+      },
+      {
+        id: 'legs', label: 'Legs', sub: 'T6', color: 'legs',
+        exercises: [
+          { id: 'squat', name: 'Barbell Squat', type: 'comp', schema: '4×5–8', sets: 4, note: 'Bài chính. High bar hoặc low bar.' },
+          { id: 'rdl', name: 'Romanian Deadlift', type: 'comp', schema: '3×8–10', sets: 3, note: 'Nhắm hamstring. Cảm nhận căng ở đùi sau.' },
+          { id: 'legpress', name: 'Leg Press', type: 'comp', schema: '3×10–12', sets: 3, note: 'Full ROM. Không khóa gối ở trên.' },
+          { id: 'legext', name: 'Leg Extension', type: 'iso', schema: '3×12–15', sets: 3, note: 'Giữ 1 giây ở đỉnh.' },
+          { id: 'legcurl', name: 'Leg Curl', type: 'iso', schema: '3×12–15', sets: 3, note: 'Lying hoặc seated.' },
+          { id: 'calf', name: 'Standing Calf Raise', type: 'iso', schema: '4×12–20', sets: 4, note: 'Full ROM, tạm dừng ở đáy.' },
+        ]
+      },
+      {
+        id: 'upper', label: 'Upper', sub: 'T7', color: 'upper',
+        exercises: [
+          { id: 'u_bench', name: 'DB Bench Press', type: 'comp', schema: '3×8–10', sets: 3, note: 'Volume thấp hơn Push day chính.' },
+          { id: 'u_pull', name: 'Pull-up / Lat Pulldown', type: 'comp', schema: '3×8–10', sets: 3, note: 'Chọn biến thể khác với Pull day.' },
+          { id: 'u_ohp', name: 'DB Shoulder Press', type: 'comp', schema: '3×10–12', sets: 3, note: '' },
+          { id: 'u_row', name: 'DB Row (single arm)', type: 'comp', schema: '3×10–12', sets: 3, note: '' },
+          { id: 'u_lat', name: 'Lateral Raise', type: 'iso', schema: '2×12–15', sets: 2, note: '' },
+          { id: 'u_arms', name: 'Curl + Tricep Superset', type: 'iso', schema: '2×12', sets: 2, note: 'Superset để tiết kiệm thời gian.' },
+          { id: 'hammer', name: 'Hammer Curl DB', type: 'iso', schema: '3×10–12', sets: 3, note: 'Neutral grip. Nhắm brachialis và brachioradialis.' },
+          { id: 'concurl', name: 'Concentration Curl', type: 'iso', schema: '2×12–15', sets: 2, note: 'Ngồi, khuỷu tựa đùi trong. Siết đỉnh 1 giây.' },
+          { id: 'u_revcurl', name: 'Reverse EZ Bar Curl', type: 'iso', schema: '2×12–15', sets: 2, note: 'Cuối buổi, tạ nhẹ, kiểm soát chuyển động.' },
+        ]
+      }
+    ];
+
+    /* =====================================================
+       STATE
+       ===================================================== */
+    let currentWeek = getThisWeek();
+    let currentMonth = getCurrentMonthYear();
+    let currentDay = 'push';
+    let dayData = {};  // { exId: { weight, reps:[n,...], done:bool } }
+    let prevData = {};
+    let historyOpen = false;
+    let historyData = {};
+
+    function getThisWeek() {
+      const now = new Date();
+      const jan1 = new Date(now.getFullYear(), 0, 1);
+      return Math.ceil(((now - jan1) / 86400000 + jan1.getDay() + 1) / 7);
+    }
+
+    function getCurrentMonthYear() {
+      const now = new Date();
+      return { month: now.getMonth() + 1, year: now.getFullYear() };
+    }
+
+    function weekLabel(w) { return `W${w} / ${new Date().getFullYear()}`; }
+
+    function prevWeek(w) { return w > 1 ? w - 1 : 52; }
+
+    async function loadDay() {
+      const wk = currentWeek;
+      dayData = (await Storage.get(wk, currentDay)) || {};
+      prevData = (await Storage.get(prevWeek(wk), currentDay)) || {};
+      renderDay();
+    }
+
+    async function saveDay() {
+      await Storage.set(currentWeek, currentDay, dayData);
+    }
+
+    async function loadHistory() {
+      historyData = {};
+      const day = DAYS.find(d => d.id === currentDay);
+      for (let i = 1; i <= 8; i++) {
+        const wk = currentWeek - i;
+        if (wk < 1) break;
+        const d = await Storage.get(wk, currentDay);
+        if (d && Object.keys(d).length) historyData[wk] = d;
+      }
+      renderHistory(day);
+    }
+
+    /* =====================================================
+       RENDER
+       ===================================================== */
+    function renderUserId() {
+      const el = document.getElementById('userIdDisplay');
+      if (!el) return;
+      const id = Storage._userId;
+      el.textContent = id ? id.slice(0, 8) + '...' : '—';
+      el.title = id;
+    }
+
+    function copyUserId() {
+      navigator.clipboard.writeText(Storage._userId);
+      alert('Đã copy User ID. Dán vào thiết bị khác để đồng bộ.');
+    }
+
+    function changeUserId() {
+      const input = prompt('Nhập User ID từ thiết bị khác:');
+      if (input && input.trim().length > 8) {
+        Storage.setUser(input.trim());
+      }
+    }
+
+    // Sửa hàm init() — thêm Storage.initUser() vào đầu:
+    function init() {
+      Storage.initUser(); // <-- thêm dòng này
+      document.getElementById('storageDot').className = 'cf-dot ' + (Storage.isRemote() ? 'remote' : 'local');
+      document.getElementById('storageLabel').textContent = Storage.isRemote() ? 'Cloudflare Worker' : 'localStorage';
+      renderTabs();
+      updateWeekUI();
+      loadDay();
+    }
+
+    function renderTabs() {
+      const container = document.getElementById('dayTabs');
+      container.innerHTML = DAYS.map(d =>
+        `<button class="day-tab" data-id="${d.id}" onclick="switchDay('${d.id}')">${d.label} <span style="opacity:.5;font-size:10px;">${d.sub}</span></button>`
+      ).join('');
+      updateTabActive();
+    }
+
+    function updateTabActive() {
+      document.querySelectorAll('.day-tab').forEach(btn => {
+        const active = btn.dataset.id === currentDay;
+        const day = DAYS.find(d => d.id === btn.dataset.id);
+        btn.className = 'day-tab' + (active ? ` active-${day.color}` : '');
+      });
+    }
+
+    function updateWeekUI() {
+      document.getElementById('weekLabel').textContent = weekLabel(currentWeek);
+      document.getElementById('headerWeek').textContent = `Tuần ${currentWeek} ( Tháng ${currentMonth.month}/${currentMonth.year} )`;
+    }
+
+    function switchDay(id) {
+      currentDay = id;
+      historyOpen = false;
+      updateTabActive();
+      loadDay();
+    }
+
+    function changeWeek(delta) {
+      currentWeek = Math.max(1, Math.min(52, currentWeek + delta));
+      updateWeekUI();
+      loadDay();
+    }
+
+    function getDayExData(exId) {
+      if (!dayData[exId]) dayData[exId] = { weight: '', reps: [], done: false };
+      return dayData[exId];
+    }
+
+    function renderDay() {
+      const day = DAYS.find(d => d.id === currentDay);
+      const completed = day.exercises.filter(e => getDayExData(e.id).done).length;
+      const total = day.exercises.length;
+      const pct = total ? Math.round(completed / total * 100) : 0;
+      const color = `var(--${day.color})`;
+
+      let html = `
+    <div class="day-panel">
+      <div class="day-summary">
+        <span class="day-progress-text">${completed} / ${total} bài hoàn thành</span>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div class="progress-bar-wrap">
+            <div class="progress-bar-fill" style="width:${pct}%;background:${color};"></div>
+          </div>
+          <span style="font-family:var(--mono);font-size:11px;color:var(--muted);">${pct}%</span>
+        </div>
+      </div>`;
+
+      day.exercises.forEach(ex => {
+        html += renderExCard(ex, day.color);
+      });
+
+      html += `
+      <button class="history-btn" onclick="toggleHistory()">
+        &#x2195; Lịch sử các tuần trước
+      </button>
+      <div class="history-panel ${historyOpen ? 'open' : ''}" id="historyPanel">
+        <div class="history-header"><span class="history-title">LỊCH SỬ — ${day.label.toUpperCase()}</span></div>
+        <div class="history-body" id="historyBody"><div class="empty-history">Đang tải...</div></div>
+      </div>
+    </div>`;
+
+      document.getElementById('dayContent').innerHTML = html;
+
+      if (historyOpen) loadHistory();
+    }
+
+    function renderExCard(ex, dayColor) {
+      const data = getDayExData(ex.id);
+      const prev = prevData[ex.id] || {};
+      const isOpen = !data.done;
+      const isDone = data.done;
+
+      let setsHtml = '';
+      const cols = ex.sets;
+
+      const headers = Array.from({ length: cols }, (_, i) => `<span class="set-col-label">S${i + 1}</span>`).join('');
+      const repInputs = Array.from({ length: cols }, (_, i) => {
+        const val = data.reps[i] !== undefined ? data.reps[i] : '';
+        const hasVal = val !== '';
+        const prevVal = (prev.reps || [])[i];
+        let cls = 'rep-input' + (hasVal ? ' has-val' : '');
+        return `<input type="number" class="${cls}" value="${val}" min="0" max="50"
+      data-ex="${ex.id}" data-set="${i}"
+      oninput="onRepInput(this)" onchange="onRepChange(this)">`;
+      }).join('');
+
+      const prevVals = Array.from({ length: cols }, (_, i) => {
+        const prevVal = (prev.reps || [])[i];
+        const curVal = data.reps[i];
+        if (prevVal === undefined) return `<span class="prev-val">—</span>`;
+        let cls = 'prev-val';
+        if (curVal !== undefined && curVal !== '') {
+          if (curVal > prevVal) cls += ' higher';
+          else if (curVal < prevVal) cls += ' lower';
+        }
+        return `<span class="${cls}">${prevVal}</span>`;
+      }).join('');
+
+      setsHtml = `
+    <div class="sets-header" style="--cols:${cols}">
+      <span></span>${headers}
+    </div>
+    <div class="sets-grid">
+      <div class="set-row" style="--cols:${cols}">
+        <span class="set-row-label">Reps</span>${repInputs}
+      </div>
+      <div class="set-row" style="--cols:${cols}">
+        <span class="prev-row-label">Trước</span>${prevVals}
+      </div>
+    </div>`;
+
+      const prevWeight = prev.weight ? `prev: ${prev.weight}kg` : '';
+      const poHint = computePoHint(ex, data, prev);
+
+      return `
+    <div class="ex-card ${isDone ? 'completed' : ''} ${isOpen && !isDone ? 'open' : ''}" id="card-${ex.id}">
+      <div class="ex-header" onclick="toggleCard('${ex.id}')">
+        <div class="ex-check" onclick="toggleDone(event,'${ex.id}')">
+          <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+            <path d="M1 4L3.5 6.5L9 1" stroke="#0f0f0f" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <span class="ex-name">${ex.name}</span>
+        <span class="ex-type ${ex.type === 'comp' ? 'type-comp' : 'type-iso'}">${ex.type === 'comp' ? 'compound' : 'isolation'}</span>
+        <span class="ex-schema">${ex.schema}</span>
+        <span class="ex-chevron">&#x25BE;</span>
+      </div>
+      <div class="ex-body">
+        <div class="weight-row">
+          <span class="weight-label">Tạ</span>
+          <input type="number" class="weight-input" value="${data.weight || ''}"
+            placeholder="—" data-ex="${ex.id}"
+            oninput="onWeightInput(this)">
+          <span class="weight-unit">kg</span>
+          ${prevWeight ? `<span class="weight-prev">(${prevWeight})</span>` : ''}
+        </div>
+        ${setsHtml}
+        <div class="po-hint ${poHint.cls} ${poHint.msg ? 'show' : ''}" id="hint-${ex.id}">${poHint.msg}</div>
+        ${ex.note ? `<div class="ex-note">${ex.note}</div>` : ''}
+      </div>
+    </div>`;
+    }
+
+    function computePoHint(ex, data, prev) {
+      const reps = data.reps.filter(r => r !== '' && r !== undefined);
+      if (!reps.length) return { cls: '', msg: '' };
+
+      const schemaMatch = ex.schema.match(/(\d+)–(\d+)/);
+      if (!schemaMatch) return { cls: '', msg: '' };
+      const topRep = parseInt(schemaMatch[2]);
+      const allAtTop = reps.length === ex.sets && reps.every(r => parseInt(r) >= topRep);
+
+      if (allAtTop) return { cls: 'increase', msg: `Tất cả sets đạt ${topRep} reps — tang ta o buoi sau!` };
+
+      const allSets = reps.length === ex.sets;
+      const avgRep = reps.reduce((a, b) => a + parseInt(b), 0) / reps.length;
+      if (allSets && avgRep >= topRep - 1) return { cls: 'almost', msg: `Con rat gan! Them 1 rep nua la tang ta duoc.` };
+
+      const prevReps = (prev.reps || []).filter(r => r !== '' && r !== undefined);
+      if (prevReps.length && reps.length) {
+        const prevAvg = prevReps.reduce((a, b) => a + parseInt(b), 0) / prevReps.length;
+        if (avgRep > prevAvg) return { cls: 'great', msg: `Tang trung binh ${(avgRep - prevAvg).toFixed(1)} reps so voi tuan truoc.` };
+      }
+      return { cls: '', msg: '' };
+    }
+
+    function renderHistory(day) {
+      const body = document.getElementById('historyBody');
+      if (!body) return;
+      if (!Object.keys(historyData).length) {
+        body.innerHTML = '<div class="empty-history">Chưa có dữ liệu tuần trước.</div>';
+        return;
+      }
+      let html = '';
+      day.exercises.forEach(ex => {
+        const weeks = Object.entries(historyData).sort((a, b) => b[0] - a[0]);
+        const hasAny = weeks.some(([, d]) => d[ex.id] && (d[ex.id].weight || d[ex.id].reps?.length));
+        if (!hasAny) return;
+        html += `<div class="history-ex"><div class="history-ex-name">${ex.name}</div>`;
+        weeks.forEach(([wk, d], idx) => {
+          const exd = d[ex.id];
+          if (!exd) return;
+          const repsStr = (exd.reps || []).filter(r => r !== '' && r !== undefined).join(' / ') || '—';
+          const wStr = exd.weight ? `${exd.weight}kg` : '—';
+          let delta = '';
+          if (idx < weeks.length - 1) {
+            const nextWk = weeks[idx + 1];
+            const nextW = nextWk && nextWk[1][ex.id]?.weight;
+            if (nextW && exd.weight && exd.weight > nextW) {
+              delta = `<span class="hw-delta up">+${(exd.weight - nextW).toFixed(1)}kg</span>`;
+            }
+          }
+          html += `<div class="history-week-row">
+        <span class="hw-label">W${wk}</span>
+        <span class="hw-val">${wStr} — ${repsStr}</span>
+        ${delta}
+      </div>`;
+        });
+        html += `</div>`;
+      });
+      body.innerHTML = html || '<div class="empty-history">Chưa có dữ liệu.</div>';
+    }
+
+    /* =====================================================
+       EVENT HANDLERS
+       ===================================================== */
+    function toggleCard(exId) {
+      const card = document.getElementById('card-' + exId);
+      if (!card) return;
+      card.classList.toggle('open');
+    }
+
+    function toggleDone(event, exId) {
+      event.stopPropagation();
+      const data = getDayExData(exId);
+      data.done = !data.done;
+      saveDay();
+      renderDay();
+    }
+
+    function onWeightInput(input) {
+      const exId = input.dataset.ex;
+      getDayExData(exId).weight = input.value;
+      saveDay();
+    }
+
+    function onRepInput(input) {
+      const exId = input.dataset.ex;
+      const setIdx = parseInt(input.dataset.set);
+      const data = getDayExData(exId);
+      if (!data.reps) data.reps = [];
+      data.reps[setIdx] = input.value === '' ? '' : parseInt(input.value);
+      input.classList.toggle('has-val', input.value !== '');
+      const ex = DAYS.flatMap(d => d.exercises).find(e => e.id === exId);
+      const prev = prevData[exId] || {};
+      const hint = computePoHint(ex, data, prev);
+      const hintEl = document.getElementById('hint-' + exId);
+      if (hintEl) {
+        hintEl.textContent = hint.msg;
+        hintEl.className = `po-hint ${hint.cls} ${hint.msg ? 'show' : ''}`;
+      }
+      updatePrevHighlight(exId);
+      saveDay();
+    }
+
+    function onRepChange(input) {
+      saveDay();
+    }
+
+    function updatePrevHighlight(exId) {
+      const data = getDayExData(exId);
+      const prev = prevData[exId] || {};
+      const card = document.getElementById('card-' + exId);
+      if (!card) return;
+      card.querySelectorAll('.prev-val').forEach((el, i) => {
+        const prevVal = (prev.reps || [])[i];
+        const curVal = data.reps[i];
+        el.className = 'prev-val';
+        if (prevVal !== undefined && curVal !== undefined && curVal !== '') {
+          if (curVal > prevVal) el.classList.add('higher');
+          else if (curVal < prevVal) el.classList.add('lower');
+        }
+      });
+    }
+
+    async function toggleHistory() {
+      historyOpen = !historyOpen;
+      const panel = document.getElementById('historyPanel');
+      if (!panel) return;
+      panel.classList.toggle('open', historyOpen);
+      if (historyOpen) {
+        const day = DAYS.find(d => d.id === currentDay);
+        await loadHistory();
+        renderHistory(day);
+      }
+    }
+
+    /* =====================================================
+       BOOT
+       ===================================================== */
+    init();
+  </script>
+</body>
+
+</html>
