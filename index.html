@@ -912,12 +912,14 @@
     function switchDay(id) {
       currentDay = id;
       historyOpen = false;
+      openCards = null; // reset khi đổi ngày
       updateTabActive();
       loadDay();
     }
 
     function changeWeek(delta) {
       currentWeek = Math.max(1, Math.min(52, currentWeek + delta));
+      openCards = null; // reset khi đổi tuần
       updateWeekUI();
       loadDay();
     }
@@ -934,31 +936,37 @@
       const pct = total ? Math.round(completed / total * 100) : 0;
       const color = `var(--${day.color})`;
 
+      if (openCards === null) {
+        openCards = new Set(
+          day.exercises.filter(e => !getDayExData(e.id).done).map(e => e.id)
+        );
+      }
+
       let html = `
-    <div class="day-panel">
-      <div class="day-summary">
-        <span class="day-progress-text">${completed} / ${total} bài hoàn thành</span>
-        <div style="display:flex;align-items:center;gap:8px;">
-          <div class="progress-bar-wrap">
-            <div class="progress-bar-fill" style="width:${pct}%;background:${color};"></div>
-          </div>
-          <span style="font-family:var(--mono);font-size:11px;color:var(--muted);">${pct}%</span>
-        </div>
-      </div>`;
+        <div class="day-panel">
+          <div class="day-summary">
+            <span class="day-progress-text">${completed} / ${total} bài hoàn thành</span>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <div class="progress-bar-wrap">
+                <div class="progress-bar-fill" style="width:${pct}%;background:${color};"></div>
+              </div>
+              <span style="font-family:var(--mono);font-size:11px;color:var(--muted);">${pct}%</span>
+            </div>
+          </div>`;
 
       day.exercises.forEach(ex => {
         html += renderExCard(ex, day.color);
       });
 
       html += `
-      <button class="history-btn" onclick="toggleHistory()">
-        &#x2195; Lịch sử các tuần trước
-      </button>
-      <div class="history-panel ${historyOpen ? 'open' : ''}" id="historyPanel">
-        <div class="history-header"><span class="history-title">LỊCH SỬ — ${day.label.toUpperCase()}</span></div>
-        <div class="history-body" id="historyBody"><div class="empty-history">Đang tải...</div></div>
-      </div>
-    </div>`;
+        <button class="history-btn" onclick="toggleHistory()">
+          &#x2195; Lịch sử các tuần trước
+        </button>
+        <div class="history-panel ${historyOpen ? 'open' : ''}" id="historyPanel">
+          <div class="history-header"><span class="history-title">LỊCH SỬ — ${day.label.toUpperCase()}</span></div>
+          <div class="history-body" id="historyBody"><div class="empty-history">Đang tải...</div></div>
+        </div>
+      </div>`;
 
       document.getElementById('dayContent').innerHTML = html;
 
@@ -968,8 +976,8 @@
     function renderExCard(ex, dayColor) {
       const data = getDayExData(ex.id);
       const prev = prevData[ex.id] || {};
-      const isOpen = !data.done;
       const isDone = data.done;
+      const isOpen = openCards.has(ex.id) && !isDone; // dùng openCards
 
       let setsHtml = '';
       const cols = ex.sets;
@@ -1109,12 +1117,18 @@
       const card = document.getElementById('card-' + exId);
       if (!card) return;
       card.classList.toggle('open');
-    }
 
+      if (openCards.has(exId)) openCards.delete(exId);
+      else openCards.add(exId);
+      document.getElementById('card-' + exId)?.classList.toggle('open');
+    }
+    let openCards = null;
     function toggleDone(event, exId) {
       event.stopPropagation();
       const data = getDayExData(exId);
       data.done = !data.done;
+      if (data.done) openCards.delete(exId); // đóng khi done
+      else openCards.add(exId); // mở lại khi bỏ done
       saveDay();
       renderDay();
     }
