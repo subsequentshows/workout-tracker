@@ -1,5 +1,5 @@
 export interface Env {
-	WORKOUT_DATA: KVNamespace;
+	WORKOUT_DATA_preview: KVNamespace;
 }
 
 const CORS = {
@@ -20,14 +20,14 @@ export default {
 		if (request.method === 'GET') {
 			const key = url.searchParams.get('key');
 			if (!key) return new Response(JSON.stringify({ error: 'missing key' }), { status: 400, headers });
-			const value = await env.WORKOUT_DATA.get(key);
+			const value = await env.WORKOUT_DATA_preview.get(key);
 			return new Response(value ?? 'null', { headers });
 		}
 
 		if (request.method === 'PUT') {
 			const { key, value } = await request.json<{ key: string; value: unknown }>();
 			if (!key) return new Response(JSON.stringify({ error: 'missing key' }), { status: 400, headers });
-			await env.WORKOUT_DATA.put(key, JSON.stringify(value));
+			await env.WORKOUT_DATA_preview.put(key, JSON.stringify(value));
 			return new Response(JSON.stringify({ ok: true }), { headers });
 		}
 

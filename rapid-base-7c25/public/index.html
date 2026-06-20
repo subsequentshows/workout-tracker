@@ -974,12 +974,12 @@
 
     function onModalInput(input) {
       const val = input.value.trim();
-      document.getElementById('modalConfirm').disabled = val.length < 10 || val === Storage._userId;
+      document.getElementById('modalConfirm').disabled = val.length < 5 || val === Storage._userId;
     }
 
     function confirmChangeId() {
       const val = document.getElementById('modalInput').value.trim();
-      if (!val || val.length < 10) return;
+      if (!val || val.length < 5) return;
       Storage.setUser(val);
       closeModal();
       showToast('Đã đổi ID — đang tải dữ liệu...', 'info');

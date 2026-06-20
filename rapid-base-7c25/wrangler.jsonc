@@ -6,7 +6,7 @@
 	"rules": [{ "type": "Text", "globs": ["**/*.html"], "fallthrough": true }],
 	"kv_namespaces": [
 		{
-			"binding": "WORKOUT_DATA",
+			"binding": "WORKOUT_DATA_preview",
 			"id": "b0e259870fc54367b349c40af5369505",
 			"preview_id": "PREVIEW_ID_CỦA_BẠN",
 		},

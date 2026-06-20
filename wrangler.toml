@@ -5,6 +5,6 @@ main = "rapid-base-7c25/src/index.ts"
 assets = { directory = "rapid-base-7c25/public" }
 
 [[kv_namespaces]]
-binding = "WORKOUT_DATA"
+binding = "WORKOUT_DATA_preview"
 id = "b0e259870fc54367b349c40af5369505"
 preview_id = "PREVIEW_ID_CỦA_BẠN"
