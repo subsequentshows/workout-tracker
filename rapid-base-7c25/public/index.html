@@ -302,12 +302,13 @@
       font-family: var(--mono);
       font-size: 11px;
       color: var(--hint);
-      margin-left: 4px;
+      margin-left: 5px;
       white-space: nowrap;
+      min-width: 48px;
     }
 
     .ex-chevron {
-      font-size: 12px;
+      font-size: 20px;
       color: var(--hint);
       transition: transform .2s;
     }
@@ -826,9 +827,14 @@
       appearance: textfield;
     }
 
+    #work-out-note  {
+      padding: 12px 25px;
+    }
+
     #work-out-note table {
       border-collapse: separate;
       border-spacing: 0 6px;
+      width: 100%;
     }
 
     #work-out-note thead {
@@ -851,6 +857,10 @@
 
     #work-out-note tbody td:last-child {
       border-radius: 0 6px 6px 0;
+    }
+
+    #work-out-note tbody tr td {
+      width: 50%;
     }
 
     @media (max-width: 600px) {
@@ -1421,7 +1431,7 @@
     function renderTabs() {
       const container = document.getElementById('dayTabs');
       container.innerHTML = DAYS.map(d =>
-        `<button class="day-tab" data-id="${d.id}" onclick="switchDay('${d.id}')">${d.label} <span style="opacity:.5;font-size:10px;">${d.sub}</span></button>`
+        `<button class="day-tab" data-id="${d.id}" onclick="switchDay('${d.id}')">${d.label} <span style="opacity:.5;font-size:10px; margin-left: 3px;">${d.sub}</span></button>`
       ).join('');
       updateTabActive();
     }
