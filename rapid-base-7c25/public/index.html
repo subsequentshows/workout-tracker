@@ -1,1056 +1,1114 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="vi">
-
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Workout Tracker</title>
-  <link rel="icon" type="image/x-icon" href="../favicon.ico">
-
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap');
-
-    *,
-    *::before,
-    *::after {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    :root {
-      --bg: #090a0c;
-      --surface: #14171b;
-      --surface2: #1b2026;
-      --surface3: #232932;
-      --border: #262d36;
-      --border2: #343d49;
-      --text: #f5f7fb;
-      --muted: #b7bfcc;
-      --hint: #7e8796;
-      --push: #a78bfa;
-      --push-dim: #3b2f6b;
-      --pull: #34d399;
-      --pull-dim: #1a3d30;
-      --legs: #fb923c;
-      --legs-dim: #3d2010;
-      --upper: #60a5fa;
-      --upper-dim: #1a2f4a;
-      --success: #34d399;
-      --success-dim: #0d2a20;
-      --warn: #fbbf24;
-      --warn-dim: #2d2000;
-      --mono: 'DM Mono', monospace;
-      --sans: 'DM Sans', sans-serif;
-    }
-
-    body {
-      font-family: var(--sans);
-      background: radial-gradient(circle at top, #171b22 0, var(--bg) 340px);
-      color: var(--text);
-      min-height: 100vh;
-      font-size: 14px;
-      line-height: 1.5;
-    }
-
-    span {
-      color: #fff;
-    }
-
-    .app {
-      max-width: 680px;
-      margin: 0 auto;
-      padding: 0 0 96px;
-    }
-
-    /* Header */
-    .header {
-      position: sticky;
-      top: 0;
-      z-index: 50;
-      background: rgba(9, 10, 12, .92);
-      backdrop-filter: blur(18px);
-      border-bottom: 1px solid var(--border);
-      padding: 16px 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .header-title {
-      font-size: 22px;
-      font-weight: 700;
-      letter-spacing: 0;
-      color: var(--text);
-    }
-
-    .header-week {
-      font-family: var(--mono);
-      font-size: 11px;
-      color: var(--muted);
-      margin-top: 2px;
-    }
-
-    .week-nav {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .week-btn {
-      width: 36px;
-      height: 36px;
-      border-radius: 10px;
-      border: 1px solid var(--border2);
-      background: transparent;
-      color: var(--muted);
-      cursor: pointer;
-      font-size: 14px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all .15s;
-    }
-
-    .week-btn:hover {
-      border-color: var(--text);
-      color: var(--text);
-    }
-
-    .week-label {
-      font-family: var(--mono);
-      font-size: 12px;
-      color: var(--text);
-      min-width: 70px;
-      text-align: center;
-    }
-
-    /* Day tabs */
-    .day-tabs {
-      display: flex;
-      gap: 8px;
-      border-bottom: none;
-      padding: 14px 20px 8px;
-      overflow-x: auto;
-      scrollbar-width: none;
-    }
-
-    .day-tabs::-webkit-scrollbar {
-      display: none;
-    }
-
-    .day-tab {
-      flex: 1 0 auto;
-      min-width: 82px;
-      padding: 12px 16px;
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--muted);
-      border: none;
-      background: var(--surface);
-      border-radius: 999px;
-      cursor: pointer;
-      white-space: nowrap;
-      transition: all .15s;
-      font-family: var(--sans);
-    }
-
-    .day-tab:hover {
-      color: var(--text);
-    }
-
-    .day-tab.active-push {
-      color: var(--push);
-      background: var(--push-dim);
-    }
-
-    .day-tab.active-pull {
-      color: var(--pull);
-      background: var(--pull-dim);
-    }
-
-    .day-tab.active-legs {
-      color: var(--legs);
-      background: var(--legs-dim);
-    }
-
-    .day-tab.active-upper {
-      color: var(--upper);
-      background: var(--upper-dim);
-    }
-
-    /* Day panel */
-    .day-panel {
-      padding: 12px 20px;
-    }
-
-    .day-summary {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 14px;
-      padding: 14px;
-      background: linear-gradient(135deg, rgba(255, 255, 255, .05), rgba(255, 255, 255, .02));
-      border: 1px solid var(--border);
-      border-radius: 14px;
-    }
-
-    .day-progress-text {
-      font-family: var(--mono);
-      font-size: 11px;
-      color: var(--muted);
-    }
-
-    .progress-bar-wrap {
-      width: 120px;
-      height: 6px;
-      background: var(--surface3);
-      border-radius: 999px;
-      overflow: hidden;
-    }
-
-    .progress-bar-fill {
-      height: 100%;
-      border-radius: 2px;
-      transition: width .3s;
-    }
-
-    /* Exercise card */
-    .ex-card {
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      margin-bottom: 10px;
-      overflow: hidden;
-      transition: border-color .15s;
-      background: rgba(20, 23, 27, .92);
-    }
-
-    .ex-card.completed {
-      border-color: var(--border2);
-    }
-
-    .ex-header {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      min-height: 58px;
-      padding: 13px 14px;
-      cursor: pointer;
-      background: var(--surface);
-      user-select: none;
-    }
-
-    .ex-header:hover {
-      background: var(--surface2);
-    }
-
-    .ex-check {
-      width: 24px;
-      height: 24px;
-      border-radius: 8px;
-      border: 1.5px solid var(--border2);
-      flex-shrink: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all .15s;
-    }
-
-    .ex-check svg {
-      display: none;
-    }
-
-    .completed .ex-check {
-      border-color: var(--success);
-      background: var(--success);
-    }
-
-    .completed .ex-check svg {
-      display: block;
-    }
-
-    .ex-name {
-      font-weight: 500;
-      font-size: 15px;
-      flex: 1;
-    }
-
-    .completed .ex-name {
-      color: var(--muted);
-      text-decoration: line-through;
-      text-decoration-color: var(--border2);
-    }
-
-    .ex-type {
-      font-family: var(--mono);
-      font-size: 10px;
-      padding: 2px 7px;
-      border-radius: 4px;
-    }
-
-    .type-comp {
-      background: var(--push-dim);
-      color: var(--push);
-    }
-
-    .type-iso {
-      background: var(--surface2);
-      color: var(--muted);
-    }
-
-    .ex-schema {
-      font-family: var(--mono);
-      font-size: 11px;
-      color: var(--hint);
-      margin-left: 5px;
-      white-space: nowrap;
-      min-width: 48px;
-    }
-
-    .ex-chevron {
-      font-size: 20px;
-      color: var(--hint);
-      transition: transform .2s;
-    }
-
-    .ex-card.open .ex-chevron {
-      transform: rotate(180deg);
-    }
-
-    /* Sets body */
-    .ex-body {
-      display: none;
-      padding: 14px;
-      border-top: 1px solid var(--border);
-    }
-
-    .ex-card.open .ex-body {
-      display: block;
-    }
-
-    .weight-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 14px;
-    }
-
-    .weight-label {
-      font-size: 12px;
-      color: var(--muted);
-    }
-
-    .weight-input {
-      font-family: var(--mono);
-      font-size: 18px;
-      font-weight: 500;
-      background: var(--surface2);
-      border: 1px solid var(--border2);
-      color: var(--text);
-      border-radius: 10px;
-      padding: 9px 10px;
-      width: 96px;
-      text-align: center;
-    }
-
-    .weight-input:focus {
-      outline: none;
-      border-color: var(--muted);
-    }
-
-    .weight-unit {
-      font-size: 12px;
-      color: var(--muted);
-    }
-
-    .weight-prev {
-      font-family: var(--mono);
-      font-size: 11px;
-      color: var(--hint);
-      margin-left: 4px;
-    }
-
-    .sets-grid {
-      display: grid;
-      gap: 8px;
-    }
-
-    .sets-header {
-      display: grid;
-      grid-template-columns: 36px repeat(var(--cols), 1fr);
-      gap: 8px;
-      margin-bottom: 4px;
-    }
-
-    .set-col-label {
-      font-family: var(--mono);
-      font-size: 10px;
-      color: var(--hint);
-      text-align: center;
-    }
-
-    .set-row {
-      display: grid;
-      grid-template-columns: 36px repeat(var(--cols), 1fr);
-      gap: 8px;
-      align-items: center;
-    }
-
-    .set-row-label {
-      font-family: var(--mono);
-      font-size: 11px;
-      color: var(--muted);
-    }
-
-    .rep-input {
-      font-family: var(--mono);
-      font-size: 17px;
-      font-weight: 500;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      color: var(--text);
-      border-radius: 10px;
-      min-height: 46px;
-      padding: 8px 4px;
-      text-align: center;
-      width: 100%;
-      transition: border-color .15s, background .15s;
-    }
-
-    .rep-input:focus {
-      outline: none;
-      border-color: var(--muted);
-      background: var(--surface);
-    }
-
-    .rep-input.has-val {
-      border-color: var(--border2);
-      background: var(--surface);
-    }
-
-    .prev-row-label {
-      font-family: var(--mono);
-      font-size: 10px;
-      color: var(--hint);
-    }
-
-    .prev-val {
-      font-family: var(--mono);
-      font-size: 11px;
-      color: var(--hint);
-      text-align: center;
-      padding: 4px 0;
-    }
-
-    .prev-val.higher {
-      color: var(--success);
-    }
-
-    .prev-val.lower {
-      color: var(--legs);
-    }
-
-    .po-hint {
-      margin-top: 10px;
-      padding: 8px 10px;
-      border-radius: 6px;
-      font-size: 12px;
-      display: none;
-    }
-
-    .po-hint.show {
-      display: block;
-    }
-
-    .po-hint.great {
-      background: var(--success-dim);
-      color: var(--success);
-    }
-
-    .po-hint.almost {
-      background: var(--warn-dim);
-      color: var(--warn);
-    }
-
-    .po-hint.increase {
-      background: var(--pull-dim);
-      color: var(--pull);
-    }
-
-    .ex-note {
-      margin-top: 8px;
-      font-size: 11px;
-      color: var(--hint);
-      font-style: italic;
-    }
-
-    .equipment-row {
-      margin-bottom: 14px;
-    }
-
-    .equipment-label {
-      display: block;
-      margin-bottom: 7px;
-      color: var(--muted);
-      font-family: var(--mono);
-      font-size: 11px;
-    }
-
-    .equipment-options {
-      display: grid;
-      grid-template-columns: repeat(var(--equipment-cols), 1fr);
-      gap: 7px;
-    }
-
-    .equipment-btn {
-      min-height: 40px;
-      border: 1px solid var(--border2);
-      border-radius: 10px;
-      background: var(--surface2);
-      color: var(--muted);
-      font-family: var(--sans);
-      font-size: 12px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: border-color .15s, background .15s, color .15s;
-    }
-
-    .equipment-btn.active {
-      border-color: var(--active-color);
-      background: color-mix(in srgb, var(--active-color) 18%, var(--surface2));
-      color: var(--text);
-    }
-
-    /* History */
-    .history-btn {
-      width: 100%;
-      margin-top: 20px;
-      padding: 10px;
-      border-radius: 8px;
-      border: 1px dashed var(--border2);
-      background: transparent;
-      color: var(--muted);
-      font-size: 12px;
-      font-family: var(--sans);
-      cursor: pointer;
-      transition: all .15s;
-    }
-
-    .history-btn:hover {
-      border-color: var(--muted);
-      color: var(--text);
-    }
-
-    .history-panel {
-      margin-top: 12px;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      overflow: hidden;
-      display: none;
-    }
-
-    .history-panel.open {
-      display: block;
-    }
-
-    .history-header {
-      padding: 10px 14px;
-      border-bottom: 1px solid var(--border);
-      background: var(--surface);
-    }
-
-    .history-title {
-      font-family: var(--mono);
-      font-size: 11px;
-      color: var(--muted);
-    }
-
-    .history-body {
-      padding: 10px 14px;
-    }
-
-    .history-ex {
-      margin-bottom: 14px;
-    }
-
-    .history-ex:last-child {
-      margin-bottom: 0;
-    }
-
-    .history-ex-name {
-      font-size: 12px;
-      font-weight: 500;
-      margin-bottom: 6px;
-      color: var(--text);
-    }
-
-    .history-week-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 5px 0;
-      border-bottom: 1px solid var(--border);
-      font-family: var(--mono);
-      font-size: 11px;
-    }
-
-    .history-week-row:last-child {
-      border-bottom: none;
-    }
-
-    .hw-label {
-      color: var(--muted);
-    }
-
-    .hw-val {
-      color: var(--text);
-    }
-
-    .hw-delta {
-      font-size: 10px;
-      padding: 1px 6px;
-      border-radius: 3px;
-    }
-
-    .hw-delta.up {
-      background: var(--success-dim);
-      color: var(--success);
-    }
-
-    .empty-history {
-      font-size: 12px;
-      color: var(--hint);
-      text-align: center;
-      padding: 20px 0;
-      font-style: italic;
-    }
-
-    /* CF badge */
-    .cf-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      font-family: var(--mono);
-      font-size: 10px;
-      padding: 3px 8px;
-      border-radius: 4px;
-      background: var(--surface2);
-      color: var(--hint);
-      border: 1px solid var(--border);
-    }
-
-    .cf-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: var(--hint);
-    }
-
-    .cf-dot.local {
-      background: var(--warn);
-    }
-
-    .cf-dot.remote {
-      background: var(--success);
-    }
-
-    /* ── TOAST ── */
-    .toast {
-      position: fixed;
-      bottom: 28px;
-      left: 50%;
-      transform: translateX(-50%) translateY(12px);
-      background: var(--surface2);
-      border: 1px solid var(--border2);
-      color: var(--text);
-      font-family: var(--mono);
-      font-size: 12px;
-      padding: 9px 18px;
-      border-radius: 8px;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity .2s, transform .2s;
-      white-space: nowrap;
-      z-index: 200;
-    }
-
-    .toast.show {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
-    }
-
-    .toast.success {
-      border-color: var(--success);
-      color: var(--success);
-    }
-
-    .toast.info {
-      border-color: var(--push);
-      color: var(--push);
-    }
-
-    /* ── MODAL ── */
-    .modal-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, .7);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 100;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity .2s;
-    }
-
-    .modal-overlay.open {
-      opacity: 1;
-      pointer-events: all;
-    }
-
-    .modal {
-      background: var(--surface);
-      border: 1px solid var(--border2);
-      border-radius: 12px;
-      padding: 24px;
-      width: 340px;
-      max-width: 90vw;
-      transform: translateY(8px);
-      transition: transform .2s;
-    }
-
-    .modal-overlay.open .modal {
-      transform: translateY(0);
-    }
-
-    .modal-title {
-      font-family: var(--mono);
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--text);
-      margin-bottom: 6px;
-    }
-
-    .modal-desc {
-      font-size: 12px;
-      color: var(--hint);
-      margin-bottom: 16px;
-      line-height: 1.6;
-    }
-
-    .modal-current {
-      font-family: var(--mono);
-      font-size: 11px;
-      color: var(--muted);
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 8px 10px;
-      margin-bottom: 16px;
-      word-break: break-all;
-      cursor: pointer;
-      position: relative;
-    }
-
-    .modal-current::after {
-      content: 'click để copy';
-      position: absolute;
-      right: 8px;
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: 10px;
-      color: var(--hint);
-      opacity: .6;
-    }
-
-    .modal-input {
-      width: 100%;
-      background: var(--surface2);
-      border: 1px solid var(--border2);
-      color: var(--text);
-      font-family: var(--mono);
-      font-size: 12px;
-      border-radius: 6px;
-      padding: 9px 10px;
-      outline: none;
-      margin-bottom: 14px;
-    }
-
-    .modal-input:focus {
-      border-color: var(--push);
-    }
-
-    .modal-input::placeholder {
-      color: var(--hint);
-      opacity: .5;
-    }
-
-    .modal-actions {
-      display: flex;
-      gap: 8px;
-      justify-content: flex-end;
-    }
-
-    .modal-btn {
-      padding: 7px 16px;
-      border-radius: 6px;
-      font-size: 12px;
-      font-family: var(--sans);
-      cursor: pointer;
-      border: none;
-    }
-
-    .modal-btn.cancel {
-      background: var(--surface2);
-      color: var(--muted);
-      border: 1px solid var(--border2);
-    }
-
-    .modal-btn.confirm {
-      background: var(--push);
-      color: #fff;
-      font-weight: 500;
-    }
-
-    .modal-btn.confirm:disabled {
-      opacity: .4;
-      cursor: not-allowed;
-    }
-
-    input[type=number]::-webkit-inner-spin-button,
-    input[type=number]::-webkit-outer-spin-button {
-      -webkit-appearance: none;
-    }
-
-    input[type=number] {
-      -moz-appearance: textfield;
-      appearance: textfield;
-    }
-
-    #work-out-note  {
-      padding: 12px 25px;
-    }
-
-    #work-out-note table {
-      border-collapse: separate;
-      border-spacing: 0 6px;
-      width: 100%;
-    }
-
-    #work-out-note thead {
-      display: table-header-group;
-
-    }
-
-    #work-out-note tbody tr:first-child td {
-      padding-top: 23px;
-    }
-
-    #work-out-note tbody tr {
-      border: 1px solid var(--border2);
-      border-radius: 6px;
-    }
-
-    #work-out-note tbody td:first-child {
-      border-radius: 6px 0 0 6px;
-    }
-
-    #work-out-note tbody td:last-child {
-      border-radius: 0 6px 6px 0;
-    }
-
-    #work-out-note tbody tr td {
-      width: 50%;
-    }
-
-    @media (max-width: 600px) {
-      body {
-        font-size: 15px;
-      }
-
-      .app {
-        max-width: none;
-      }
-
-      .header {
-        display: block;
-        padding: 14px 16px;
-      }
-
-      .header .header-btn {
-        justify-content: space-between;
-        margin-bottom: 14px;
-      }
-
-      .day-tabs {
-        padding: 12px 16px 8px;
-      }
-
-      .header-wrapper {
-        flex-direction: column;
-        gap: 15px;
-      }
-
-      .header-wrapper .cf-badge {
-        align-self: flex-end;
-      }
-
-      .day-panel {
-        padding: 10px 16px 18px;
-      }
-
-      .day-summary {
-        align-items: flex-start;
-        gap: 12px;
-      }
-
-      .progress-bar-wrap {
-        width: 112px;
-      }
-
-      .ex-type {
-        display: none;
-      }
-
-      .ex-schema {
-        font-size: 10px;
-      }
-
-      .sets-header,
-      .set-row {
-        grid-template-columns: 34px repeat(var(--cols), minmax(0, 1fr));
-      }
-
-      .rep-input {
-        min-height: 50px;
-      }
-    }
-  </style>
-</head>
-
-<body>
-  <div class="app">
-    <div class="header">
-      <div>
-        <div class="header-title">Workout Tracker</div>
-        <div class="header-week" id="headerWeek"></div>
-        <div class="header-btn"
-          style="font-size:10px;color:var(--hint);margin-top:5px;display:flex;gap:8px;align-items:center;">
-          <span style="font-family:var(--mono);color:var(--hint);">ID: <span id="userIdDisplay"
-              style="color:var(--muted);">—</span></span>
-          <button onclick="copyUserId()"
-            style="font-size:11px;background:none;border:1px solid var(--border2);color:var(--hint);cursor:pointer;padding:3px 10px;border-radius:5px;font-family:var(--sans);">Copy</button>
-          <button onclick="openModal()"
-            style="font-size:11px;background:none;border:1px solid var(--push);color:var(--push);cursor:pointer;padding:3px 10px;border-radius:5px;font-family:var(--sans);">Đổi
-            ID</button>
-        </div>
-      </div>
-      <div class="header-wrapper"
-        style="display:flex; flex-direction:column; flex-wrap:wrap; align-items:center;gap:12px;">
-        <button onclick="logout()"
-          style="font-size:11px;background:none; align-self: flex-end; border:1px solid var(--border2);color:var(--muted);cursor:pointer;padding:3px 10px;border-radius:5px;font-family:var(--sans);">Logout</button>
-        <span class="cf-badge" id="storageBadge">
-          <span class="cf-dot local" id="storageDot"></span>
-          <span id="storageLabel" style="color:#fff;">localStorage</span>
-        </span>
-        <div class="week-nav">
-          <button class="week-btn" onclick="changeWeek(-1)">&#8592;</button>
-          <span class="week-label" id="weekLabel"></span>
-          <button class="week-btn" onclick="changeWeek(1)">&#8594;</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="day-tabs" id="dayTabs"></div>
-    <div id="dayContent"></div>
-
-    <div id="work-out-note">
-  <details>
-    <summary>Push</summary>
-    <table>
-      <thead>
-        <tr>
-          <th>Nhóm cơ</th>
-          <th>Bài tập</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>Ngực (Pectoralis)</td>
-          <td>Bench Press, Incline Press</td>
-        </tr>
-        <tr>
-          <td>Vai trước (Anterior deltoid)</td>
-          <td>OHP, Incline Press, Bench Press</td>
-        </tr>
-        <tr>
-          <td>Vai giữa (Lateral deltoid)</td>
-          <td>OHP</td>
-        </tr>
-        <tr>
-          <td>Tay sau (Triceps)</td>
-          <td>Bench Press, Incline Press, OHP</td>
-        </tr>
-      </tbody>
-    </table>
-  </details>
-
-  <details>
-    <summary>Pull</summary>
-    <table>
-      <thead>
-        <tr>
-          <th>Nhóm cơ</th>
-          <th>Bài tập</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>Lưng rộng (Latissimus dorsi)</td>
-          <td>Pull-up, Lat Pulldown, Row</td>
-        </tr>
-        <tr>
-          <td>Lưng giữa (Rhomboids / Mid traps)</td>
-          <td>Barbell Row, Cable Row</td>
-        </tr>
-        <tr>
-          <td>Lưng dưới (Erector spinae)</td>
-          <td>Deadlift</td>
-        </tr>
-        <tr>
-          <td>Mông + Đùi sau (Glutes / Hamstrings)</td>
-          <td>Deadlift</td>
-        </tr>
-        <tr>
-          <td>Tay trước (Biceps)</td>
-          <td>Pull-up, Row, Cable Row</td>
-        </tr>
-      </tbody>
-    </table>
-  </details>
-</div>
-  </div>
-
-  <!-- TOAST -->
-  <div class="toast" id="toast"></div>
-
-  <!-- MODAL đổi ID -->
-  <div class="modal-overlay" id="modalOverlay" onclick="closeModalOutside(event)">
-    <div class="modal">
-      <div class="modal-title">Đồng bộ thiết bị khác</div>
-      <div class="modal-desc">Dán User ID từ thiết bị khác để load cùng dữ liệu. ID hiện tại của bạn:</div>
-      <div class="modal-current" id="modalCurrentId" onclick="copyUserId()"></div>
-      <input class="modal-input" id="modalInput" type="text" placeholder="Dán User ID vào đây..."
-        oninput="onModalInput(this)">
-      <div class="modal-actions">
-        <button class="modal-btn cancel" onclick="closeModal()">Huỷ</button>
-        <button class="modal-btn confirm" id="modalConfirm" onclick="confirmChangeId()" disabled>Xác nhận</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- USER INFO -->
-  <!-- <div class="user-card" id="userCard">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Workout Tracker</title>
+		<link rel="icon" type="image/x-icon" href="../favicon.ico" />
+
+		<style>
+			@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap');
+
+			*,
+			*::before,
+			*::after {
+				box-sizing: border-box;
+				margin: 0;
+				padding: 0;
+			}
+
+			:root {
+				--bg: #090a0c;
+				--surface: #14171b;
+				--surface2: #1b2026;
+				--surface3: #232932;
+				--border: #262d36;
+				--border2: #343d49;
+				--text: #f5f7fb;
+				--muted: #b7bfcc;
+				--hint: #7e8796;
+				--push: #a78bfa;
+				--push-dim: #3b2f6b;
+				--pull: #34d399;
+				--pull-dim: #1a3d30;
+				--legs: #fb923c;
+				--legs-dim: #3d2010;
+				--upper: #60a5fa;
+				--upper-dim: #1a2f4a;
+				--success: #34d399;
+				--success-dim: #0d2a20;
+				--warn: #fbbf24;
+				--warn-dim: #2d2000;
+				--mono: 'DM Mono', monospace;
+				--sans: 'DM Sans', sans-serif;
+			}
+
+			body {
+				font-family: var(--sans);
+				background: radial-gradient(circle at top, #171b22 0, var(--bg) 340px);
+				color: var(--text);
+				min-height: 100vh;
+				font-size: 14px;
+				line-height: 1.5;
+			}
+
+			span {
+				color: #fff;
+			}
+
+			.app {
+				max-width: 680px;
+				margin: 0 auto;
+				padding: 0 0 96px;
+			}
+
+			/* Header */
+			.header {
+				position: sticky;
+				top: 0;
+				z-index: 50;
+				background: rgba(9, 10, 12, 0.92);
+				backdrop-filter: blur(18px);
+				border-bottom: 1px solid var(--border);
+				padding: 16px 20px;
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+			}
+
+			.header-title {
+				font-size: 22px;
+				font-weight: 700;
+				letter-spacing: 0;
+				color: var(--text);
+			}
+
+			.header-week {
+				font-family: var(--mono);
+				font-size: 11px;
+				color: var(--muted);
+				margin-top: 2px;
+			}
+
+			.week-nav {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+			}
+
+			.week-btn {
+				width: 36px;
+				height: 36px;
+				border-radius: 10px;
+				border: 1px solid var(--border2);
+				background: transparent;
+				color: var(--muted);
+				cursor: pointer;
+				font-size: 14px;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				transition: all 0.15s;
+			}
+
+			.week-btn:hover {
+				border-color: var(--text);
+				color: var(--text);
+			}
+
+			.week-label {
+				font-family: var(--mono);
+				font-size: 12px;
+				color: var(--text);
+				min-width: 70px;
+				text-align: center;
+			}
+
+			/* Day tabs */
+			.day-tabs {
+				display: flex;
+				gap: 8px;
+				border-bottom: none;
+				padding: 14px 20px 8px;
+				overflow-x: auto;
+				scrollbar-width: none;
+			}
+
+			.day-tabs::-webkit-scrollbar {
+				display: none;
+			}
+
+			.day-tab {
+				flex: 1 0 auto;
+				min-width: 82px;
+				padding: 12px 16px;
+				font-size: 13px;
+				font-weight: 700;
+				color: var(--muted);
+				border: none;
+				background: var(--surface);
+				border-radius: 999px;
+				cursor: pointer;
+				white-space: nowrap;
+				transition: all 0.15s;
+				font-family: var(--sans);
+			}
+
+			.day-tab:hover {
+				color: var(--text);
+			}
+
+			.day-tab.active-push {
+				color: var(--push);
+				background: var(--push-dim);
+			}
+
+			.day-tab.active-pull {
+				color: var(--pull);
+				background: var(--pull-dim);
+			}
+
+			.day-tab.active-legs {
+				color: var(--legs);
+				background: var(--legs-dim);
+			}
+
+			.day-tab.active-upper {
+				color: var(--upper);
+				background: var(--upper-dim);
+			}
+
+			/* Day panel */
+			.day-panel {
+				padding: 12px 20px;
+			}
+
+			.day-summary {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				margin-bottom: 14px;
+				padding: 14px;
+				background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+				border: 1px solid var(--border);
+				border-radius: 14px;
+			}
+
+			.day-progress-text {
+				font-family: var(--mono);
+				font-size: 11px;
+				color: var(--muted);
+			}
+
+			.progress-bar-wrap {
+				width: 120px;
+				height: 6px;
+				background: var(--surface3);
+				border-radius: 999px;
+				overflow: hidden;
+			}
+
+			.progress-bar-fill {
+				height: 100%;
+				border-radius: 2px;
+				transition: width 0.3s;
+			}
+
+			/* Exercise card */
+			.ex-card {
+				border: 1px solid var(--border);
+				border-radius: 14px;
+				margin-bottom: 10px;
+				overflow: hidden;
+				transition: border-color 0.15s;
+				background: rgba(20, 23, 27, 0.92);
+			}
+
+			.ex-card.completed {
+				border-color: var(--border2);
+			}
+
+			.ex-header {
+				display: flex;
+				align-items: center;
+				gap: 10px;
+				min-height: 58px;
+				padding: 13px 14px;
+				cursor: pointer;
+				background: var(--surface);
+				user-select: none;
+			}
+
+			.ex-header:hover {
+				background: var(--surface2);
+			}
+
+			.ex-check {
+				width: 24px;
+				height: 24px;
+				border-radius: 8px;
+				border: 1.5px solid var(--border2);
+				flex-shrink: 0;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				transition: all 0.15s;
+			}
+
+			.ex-check svg {
+				display: none;
+			}
+
+			.completed .ex-check {
+				border-color: var(--success);
+				background: var(--success);
+			}
+
+			.completed .ex-check svg {
+				display: block;
+			}
+
+			.ex-name {
+				font-weight: 500;
+				font-size: 15px;
+				flex: 1;
+			}
+
+			.completed .ex-name {
+				color: var(--muted);
+				text-decoration: line-through;
+				text-decoration-color: var(--border2);
+			}
+
+			.ex-type {
+				font-family: var(--mono);
+				font-size: 10px;
+				padding: 2px 7px;
+				border-radius: 4px;
+			}
+
+			.type-comp {
+				background: var(--push-dim);
+				color: var(--push);
+			}
+
+			.type-iso {
+				background: var(--surface2);
+				color: var(--muted);
+			}
+
+			.ex-schema {
+				font-family: var(--mono);
+				font-size: 11px;
+				color: var(--hint);
+				margin-left: 5px;
+				white-space: nowrap;
+				min-width: 48px;
+			}
+
+			.ex-chevron {
+				font-size: 20px;
+				color: var(--hint);
+				transition: transform 0.2s;
+			}
+
+			.ex-card.open .ex-chevron {
+				transform: rotate(180deg);
+			}
+
+			/* Sets body */
+			.ex-body {
+				display: none;
+				padding: 14px;
+				border-top: 1px solid var(--border);
+			}
+
+			.ex-card.open .ex-body {
+				display: block;
+			}
+
+			.weight-row {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+				margin-bottom: 14px;
+			}
+
+			.weight-label {
+				font-size: 12px;
+				color: var(--muted);
+			}
+
+			.weight-input {
+				font-family: var(--mono);
+				font-size: 18px;
+				font-weight: 500;
+				background: var(--surface2);
+				border: 1px solid var(--border2);
+				color: var(--text);
+				border-radius: 10px;
+				padding: 9px 10px;
+				width: 96px;
+				text-align: center;
+			}
+
+			.weight-input:focus {
+				outline: none;
+				border-color: var(--muted);
+			}
+
+			.weight-unit {
+				font-size: 12px;
+				color: var(--muted);
+			}
+
+			.weight-prev {
+				font-family: var(--mono);
+				font-size: 11px;
+				color: var(--hint);
+				margin-left: 4px;
+			}
+
+			.sets-grid {
+				display: grid;
+				gap: 8px;
+			}
+
+			.sets-header {
+				display: grid;
+				grid-template-columns: 36px repeat(var(--cols), 1fr);
+				gap: 8px;
+				margin-bottom: 4px;
+			}
+
+			.set-col-label {
+				font-family: var(--mono);
+				font-size: 10px;
+				color: var(--hint);
+				text-align: center;
+			}
+
+			.set-row {
+				display: grid;
+				grid-template-columns: 36px repeat(var(--cols), 1fr);
+				gap: 8px;
+				align-items: center;
+			}
+
+			.set-row-label {
+				font-family: var(--mono);
+				font-size: 11px;
+				color: var(--muted);
+			}
+
+			.rep-input {
+				font-family: var(--mono);
+				font-size: 17px;
+				font-weight: 500;
+				background: var(--surface2);
+				border: 1px solid var(--border);
+				color: var(--text);
+				border-radius: 10px;
+				min-height: 46px;
+				padding: 8px 4px;
+				text-align: center;
+				width: 100%;
+				transition:
+					border-color 0.15s,
+					background 0.15s;
+			}
+
+			.rep-input:focus {
+				outline: none;
+				border-color: var(--muted);
+				background: var(--surface);
+			}
+
+			.rep-input.has-val {
+				border-color: var(--border2);
+				background: var(--surface);
+			}
+
+			.prev-row-label {
+				font-family: var(--mono);
+				font-size: 10px;
+				color: var(--hint);
+			}
+
+			.prev-val {
+				font-family: var(--mono);
+				font-size: 11px;
+				color: var(--hint);
+				text-align: center;
+				padding: 4px 0;
+			}
+
+			.prev-val.higher {
+				color: var(--success);
+			}
+
+			.prev-val.lower {
+				color: var(--legs);
+			}
+
+			.po-hint {
+				margin-top: 10px;
+				padding: 8px 10px;
+				border-radius: 6px;
+				font-size: 12px;
+				display: none;
+			}
+
+			.po-hint.show {
+				display: block;
+			}
+
+			.po-hint.great {
+				background: var(--success-dim);
+				color: var(--success);
+			}
+
+			.po-hint.almost {
+				background: var(--warn-dim);
+				color: var(--warn);
+			}
+
+			.po-hint.increase {
+				background: var(--pull-dim);
+				color: var(--pull);
+			}
+
+			.ex-note {
+				margin-top: 8px;
+				font-size: 11px;
+				color: var(--hint);
+				font-style: italic;
+			}
+
+			.equipment-row {
+				margin-bottom: 14px;
+			}
+
+			.equipment-label {
+				display: block;
+				margin-bottom: 7px;
+				color: var(--muted);
+				font-family: var(--mono);
+				font-size: 11px;
+			}
+
+			.equipment-options {
+				display: grid;
+				grid-template-columns: repeat(var(--equipment-cols), 1fr);
+				gap: 7px;
+			}
+
+			.equipment-btn {
+				min-height: 40px;
+				border: 1px solid var(--border2);
+				border-radius: 10px;
+				background: var(--surface2);
+				color: var(--muted);
+				font-family: var(--sans);
+				font-size: 12px;
+				font-weight: 700;
+				cursor: pointer;
+				transition:
+					border-color 0.15s,
+					background 0.15s,
+					color 0.15s;
+			}
+
+			.equipment-btn.active {
+				border-color: var(--active-color);
+				background: color-mix(in srgb, var(--active-color) 18%, var(--surface2));
+				color: var(--text);
+			}
+
+			/* History */
+			.history-btn {
+				width: 100%;
+				margin-top: 20px;
+				padding: 10px;
+				border-radius: 8px;
+				border: 1px dashed var(--border2);
+				background: transparent;
+				color: var(--muted);
+				font-size: 12px;
+				font-family: var(--sans);
+				cursor: pointer;
+				transition: all 0.15s;
+			}
+
+			.history-btn:hover {
+				border-color: var(--muted);
+				color: var(--text);
+			}
+
+			.history-panel {
+				margin-top: 12px;
+				border: 1px solid var(--border);
+				border-radius: 10px;
+				overflow: hidden;
+				display: none;
+			}
+
+			.history-panel.open {
+				display: block;
+			}
+
+			.history-header {
+				padding: 10px 14px;
+				border-bottom: 1px solid var(--border);
+				background: var(--surface);
+			}
+
+			.history-title {
+				font-family: var(--mono);
+				font-size: 11px;
+				color: var(--muted);
+			}
+
+			.history-body {
+				padding: 10px 14px;
+			}
+
+			.history-ex {
+				margin-bottom: 14px;
+			}
+
+			.history-ex:last-child {
+				margin-bottom: 0;
+			}
+
+			.history-ex-name {
+				font-size: 12px;
+				font-weight: 500;
+				margin-bottom: 6px;
+				color: var(--text);
+			}
+
+			.history-week-row {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				padding: 5px 0;
+				border-bottom: 1px solid var(--border);
+				font-family: var(--mono);
+				font-size: 11px;
+			}
+
+			.history-week-row:last-child {
+				border-bottom: none;
+			}
+
+			.hw-label {
+				color: var(--muted);
+			}
+
+			.hw-val {
+				color: var(--text);
+			}
+
+			.hw-delta {
+				font-size: 10px;
+				padding: 1px 6px;
+				border-radius: 3px;
+			}
+
+			.hw-delta.up {
+				background: var(--success-dim);
+				color: var(--success);
+			}
+
+			.empty-history {
+				font-size: 12px;
+				color: var(--hint);
+				text-align: center;
+				padding: 20px 0;
+				font-style: italic;
+			}
+
+			/* CF badge */
+			.cf-badge {
+				display: inline-flex;
+				align-items: center;
+				gap: 5px;
+				font-family: var(--mono);
+				font-size: 10px;
+				padding: 3px 8px;
+				border-radius: 4px;
+				background: var(--surface2);
+				color: var(--hint);
+				border: 1px solid var(--border);
+			}
+
+			.cf-dot {
+				width: 6px;
+				height: 6px;
+				border-radius: 50%;
+				background: var(--hint);
+			}
+
+			.cf-dot.local {
+				background: var(--warn);
+			}
+
+			.cf-dot.remote {
+				background: var(--success);
+			}
+
+			/* ── TOAST ── */
+			.toast {
+				position: fixed;
+				bottom: 28px;
+				left: 50%;
+				transform: translateX(-50%) translateY(12px);
+				background: var(--surface2);
+				border: 1px solid var(--border2);
+				color: var(--text);
+				font-family: var(--mono);
+				font-size: 12px;
+				padding: 9px 18px;
+				border-radius: 8px;
+				opacity: 0;
+				pointer-events: none;
+				transition:
+					opacity 0.2s,
+					transform 0.2s;
+				white-space: nowrap;
+				z-index: 200;
+			}
+
+			.toast.show {
+				opacity: 1;
+				transform: translateX(-50%) translateY(0);
+			}
+
+			.toast.success {
+				border-color: var(--success);
+				color: var(--success);
+			}
+
+			.toast.info {
+				border-color: var(--push);
+				color: var(--push);
+			}
+
+			/* ── MODAL ── */
+			.modal-overlay {
+				position: fixed;
+				inset: 0;
+				background: rgba(0, 0, 0, 0.7);
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				z-index: 100;
+				opacity: 0;
+				pointer-events: none;
+				transition: opacity 0.2s;
+			}
+
+			.modal-overlay.open {
+				opacity: 1;
+				pointer-events: all;
+			}
+
+			.modal {
+				background: var(--surface);
+				border: 1px solid var(--border2);
+				border-radius: 12px;
+				padding: 24px;
+				width: 340px;
+				max-width: 90vw;
+				transform: translateY(8px);
+				transition: transform 0.2s;
+			}
+
+			.modal-overlay.open .modal {
+				transform: translateY(0);
+			}
+
+			.modal-title {
+				font-family: var(--mono);
+				font-size: 13px;
+				font-weight: 500;
+				color: var(--text);
+				margin-bottom: 6px;
+			}
+
+			.modal-desc {
+				font-size: 12px;
+				color: var(--hint);
+				margin-bottom: 16px;
+				line-height: 1.6;
+			}
+
+			.modal-current {
+				font-family: var(--mono);
+				font-size: 11px;
+				color: var(--muted);
+				background: var(--surface2);
+				border: 1px solid var(--border);
+				border-radius: 6px;
+				padding: 8px 10px;
+				margin-bottom: 16px;
+				word-break: break-all;
+				cursor: pointer;
+				position: relative;
+			}
+
+			.modal-current::after {
+				content: 'click để copy';
+				position: absolute;
+				right: 8px;
+				top: 50%;
+				transform: translateY(-50%);
+				font-size: 10px;
+				color: var(--hint);
+				opacity: 0.6;
+			}
+
+			.modal-input {
+				width: 100%;
+				background: var(--surface2);
+				border: 1px solid var(--border2);
+				color: var(--text);
+				font-family: var(--mono);
+				font-size: 12px;
+				border-radius: 6px;
+				padding: 9px 10px;
+				outline: none;
+				margin-bottom: 14px;
+			}
+
+			.modal-input:focus {
+				border-color: var(--push);
+			}
+
+			.modal-input::placeholder {
+				color: var(--hint);
+				opacity: 0.5;
+			}
+
+			.modal-actions {
+				display: flex;
+				gap: 8px;
+				justify-content: flex-end;
+			}
+
+			.modal-btn {
+				padding: 7px 16px;
+				border-radius: 6px;
+				font-size: 12px;
+				font-family: var(--sans);
+				cursor: pointer;
+				border: none;
+			}
+
+			.modal-btn.cancel {
+				background: var(--surface2);
+				color: var(--muted);
+				border: 1px solid var(--border2);
+			}
+
+			.modal-btn.confirm {
+				background: var(--push);
+				color: #fff;
+				font-weight: 500;
+			}
+
+			.modal-btn.confirm:disabled {
+				opacity: 0.4;
+				cursor: not-allowed;
+			}
+
+			input[type='number']::-webkit-inner-spin-button,
+			input[type='number']::-webkit-outer-spin-button {
+				-webkit-appearance: none;
+			}
+
+			input[type='number'] {
+				-moz-appearance: textfield;
+				appearance: textfield;
+			}
+
+			#work-out-note {
+				padding: 12px 25px;
+			}
+
+			#work-out-note .ex-header {
+				position: relative;
+			}
+
+			#work-out-note .ex-header::before {
+				content: '▾';
+				position: absolute;
+				right: 20px;
+				top: 32%;
+				width: 4px;
+				height: 100%;
+			}
+
+			#work-out-note table {
+				border-collapse: separate;
+				border-spacing: 0 6px;
+				width: 100%;
+			}
+
+			#work-out-note thead {
+				display: table-header-group;
+			}
+
+			#work-out-note tbody tr:first-child td {
+				padding-top: 23px;
+			}
+
+			#work-out-note tbody tr {
+				border: 1px solid var(--border2);
+				border-radius: 6px;
+			}
+
+			#work-out-note tbody td:first-child {
+				border-radius: 6px 0 0 6px;
+			}
+
+			#work-out-note tbody td:last-child {
+				border-radius: 0 6px 6px 0;
+			}
+
+			#work-out-note tbody tr td {
+				width: 50%;
+			}
+
+			@media (max-width: 600px) {
+				body {
+					font-size: 15px;
+				}
+
+				.app {
+					max-width: none;
+				}
+
+				.header {
+					display: block;
+					padding: 14px 16px;
+				}
+
+				.header .header-btn {
+					justify-content: space-between;
+					margin-bottom: 14px;
+				}
+
+				.day-tabs {
+					padding: 12px 16px 8px;
+				}
+
+				.header-wrapper {
+					flex-direction: column;
+					gap: 15px;
+				}
+
+				.header-wrapper .cf-badge {
+					align-self: flex-end;
+				}
+
+				.day-panel {
+					padding: 10px 16px 18px;
+				}
+
+				.day-summary {
+					align-items: flex-start;
+					gap: 12px;
+				}
+
+				.progress-bar-wrap {
+					width: 112px;
+				}
+
+				.ex-type {
+					display: none;
+				}
+
+				.ex-schema {
+					font-size: 10px;
+				}
+
+				.sets-header,
+				.set-row {
+					grid-template-columns: 34px repeat(var(--cols), minmax(0, 1fr));
+				}
+
+				.rep-input {
+					min-height: 50px;
+				}
+			}
+		</style>
+	</head>
+
+	<body>
+		<div class="app">
+			<div class="header">
+				<div>
+					<div class="header-title">Workout Tracker</div>
+					<div class="header-week" id="headerWeek"></div>
+					<div
+						class="header-btn"
+						style="font-size: 10px; color: var(--hint); margin-top: 5px; display: flex; gap: 8px; align-items: center"
+					>
+						<span style="font-family: var(--mono); color: var(--hint)"
+							>ID: <span id="userIdDisplay" style="color: var(--muted)">—</span></span
+						>
+						<button
+							onclick="copyUserId()"
+							style="
+								font-size: 11px;
+								background: none;
+								border: 1px solid var(--border2);
+								color: var(--hint);
+								cursor: pointer;
+								padding: 3px 10px;
+								border-radius: 5px;
+								font-family: var(--sans);
+							"
+						>
+							Copy
+						</button>
+						<button
+							onclick="openModal()"
+							style="
+								font-size: 11px;
+								background: none;
+								border: 1px solid var(--push);
+								color: var(--push);
+								cursor: pointer;
+								padding: 3px 10px;
+								border-radius: 5px;
+								font-family: var(--sans);
+							"
+						>
+							Đổi ID
+						</button>
+					</div>
+				</div>
+				<div class="header-wrapper" style="display: flex; flex-direction: column; flex-wrap: wrap; align-items: center; gap: 12px">
+					<button
+						onclick="logout()"
+						style="
+							font-size: 11px;
+							background: none;
+							align-self: flex-end;
+							border: 1px solid var(--border2);
+							color: var(--muted);
+							cursor: pointer;
+							padding: 3px 10px;
+							border-radius: 5px;
+							font-family: var(--sans);
+						"
+					>
+						Logout
+					</button>
+					<span class="cf-badge" id="storageBadge">
+						<span class="cf-dot local" id="storageDot"></span>
+						<span id="storageLabel" style="color: #fff">localStorage</span>
+					</span>
+					<div class="week-nav">
+						<button class="week-btn" onclick="changeWeek(-1)">&#8592;</button>
+						<span class="week-label" id="weekLabel"></span>
+						<button class="week-btn" onclick="changeWeek(1)">&#8594;</button>
+					</div>
+				</div>
+			</div>
+
+			<div class="day-tabs" id="dayTabs"></div>
+			<div id="dayContent"></div>
+
+			<div id="work-out-note">
+				<details class="ex-card">
+					<summary class="ex-header">Push</summary>
+					<table class="ex-body">
+						<thead>
+							<tr>
+								<th>Nhóm cơ</th>
+								<th>Bài tập</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td>Ngực (Pectoralis)</td>
+								<td>Bench Press, Incline Press</td>
+							</tr>
+							<tr>
+								<td>Vai trước (Anterior deltoid)</td>
+								<td>OHP, Incline Press, Bench Press</td>
+							</tr>
+							<tr>
+								<td>Vai giữa (Lateral deltoid)</td>
+								<td>OHP</td>
+							</tr>
+							<tr>
+								<td>Tay sau (Triceps)</td>
+								<td>Bench Press, Incline Press, OHP</td>
+							</tr>
+						</tbody>
+					</table>
+				</details>
+
+				<details class="ex-card">
+					<summary class="ex-header">Pull</summary>
+					<table class="ex-body">
+						<thead>
+							<tr>
+								<th>Nhóm cơ</th>
+								<th>Bài tập</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td>Lưng rộng (Latissimus dorsi)</td>
+								<td>Pull-up, Lat Pulldown, Row</td>
+							</tr>
+							<tr>
+								<td>Lưng giữa (Rhomboids / Mid traps)</td>
+								<td>Barbell Row, Cable Row</td>
+							</tr>
+							<tr>
+								<td>Lưng dưới (Erector spinae)</td>
+								<td>Deadlift</td>
+							</tr>
+							<tr>
+								<td>Mông + Đùi sau (Glutes / Hamstrings)</td>
+								<td>Deadlift</td>
+							</tr>
+							<tr>
+								<td>Tay trước (Biceps)</td>
+								<td>Pull-up, Row, Cable Row</td>
+							</tr>
+						</tbody>
+					</table>
+				</details>
+			</div>
+		</div>
+
+		<!-- TOAST -->
+		<div class="toast" id="toast"></div>
+
+		<!-- MODAL đổi ID -->
+		<div class="modal-overlay" id="modalOverlay" onclick="closeModalOutside(event)">
+			<div class="modal">
+				<div class="modal-title">Đồng bộ thiết bị khác</div>
+				<div class="modal-desc">Dán User ID từ thiết bị khác để load cùng dữ liệu. ID hiện tại của bạn:</div>
+				<div class="modal-current" id="modalCurrentId" onclick="copyUserId()"></div>
+				<input class="modal-input" id="modalInput" type="text" placeholder="Dán User ID vào đây..." oninput="onModalInput(this)" />
+				<div class="modal-actions">
+					<button class="modal-btn cancel" onclick="closeModal()">Huỷ</button>
+					<button class="modal-btn confirm" id="modalConfirm" onclick="confirmChangeId()" disabled>Xác nhận</button>
+				</div>
+			</div>
+		</div>
+
+		<!-- USER INFO -->
+		<!-- <div class="user-card" id="userCard">
     <div class="user-card-header">
       <div class="avatar" id="userAvatar">—</div>
       <div>
@@ -1073,438 +1131,601 @@
     </div>
   </div> -->
 
-  <script>
-    /* ── AUTH GUARD ── */
-    (function() {
-      const token = localStorage.getItem('jwt');
-      if (!token) {
-        window.location.href = 'auth.html';
-        return;
-      }
+		<script>
+			/* ── AUTH GUARD ── */
+			(function () {
+				const token = localStorage.getItem('jwt');
+				if (!token) {
+					window.location.href = 'auth.html';
+					return;
+				}
 
-      // Verify token còn hạn (decode payload, không cần gọi API)
-      try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        if (payload.exp * 1000 < Date.now()) {
-          localStorage.removeItem('jwt');
-          window.location.href = 'auth.html';
-        }
-      } catch {
-        localStorage.removeItem('jwt');
-        window.location.href = 'auth.html';
-      }
-    })();
+				// Verify token còn hạn (decode payload, không cần gọi API)
+				try {
+					const payload = JSON.parse(atob(token.split('.')[1]));
+					if (payload.exp * 1000 < Date.now()) {
+						localStorage.removeItem('jwt');
+						window.location.href = 'auth.html';
+					}
+				} catch {
+					localStorage.removeItem('jwt');
+					window.location.href = 'auth.html';
+				}
+			})();
 
-    function logout() {
-      localStorage.removeItem('jwt');
-      window.location.href = 'auth.html';
-    }
+			function logout() {
+				localStorage.removeItem('jwt');
+				window.location.href = 'auth.html';
+			}
 
-    async function loadUserInfo(token) {
-      try {
-        const res = await fetch(`${API}/me`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
+			async function loadUserInfo(token) {
+				try {
+					const res = await fetch(`${API}/me`, {
+						headers: { Authorization: `Bearer ${token}` },
+					});
 
-        if (!res.ok) {
-          localStorage.removeItem('jwt');
-          return;
-        }
+					if (!res.ok) {
+						localStorage.removeItem('jwt');
+						return;
+					}
 
-        const user = await res.json();
+					const user = await res.json();
 
-        document.getElementById('userAvatar').textContent = user.email[0].toUpperCase();
-        document.getElementById('userName').textContent = user.email;
-        document.getElementById('userId').textContent = user.id.slice(0, 8) + '...';
-        document.getElementById('userEmail').textContent = user.email;
-        document.getElementById('userCreated').textContent = new Date(user.createdAt).toLocaleDateString('vi-VN');
-        document.getElementById('tokenBox').textContent = token.slice(0, 40) + '...';
-        document.getElementById('tokenBox').dataset.full = token;
+					document.getElementById('userAvatar').textContent = user.email[0].toUpperCase();
+					document.getElementById('userName').textContent = user.email;
+					document.getElementById('userId').textContent = user.id.slice(0, 8) + '...';
+					document.getElementById('userEmail').textContent = user.email;
+					document.getElementById('userCreated').textContent = new Date(user.createdAt).toLocaleDateString('vi-VN');
+					document.getElementById('tokenBox').textContent = token.slice(0, 40) + '...';
+					document.getElementById('tokenBox').dataset.full = token;
 
-        // Ẩn form, hiện user card
-        document.querySelector('.tabs').style.display = 'none';
-        document.querySelector('.form-body').style.display = 'none';
-        document.getElementById('userCard').classList.add('show');
+					// Ẩn form, hiện user card
+					document.querySelector('.tabs').style.display = 'none';
+					document.querySelector('.form-body').style.display = 'none';
+					document.getElementById('userCard').classList.add('show');
 
-        showToast('Đăng nhập thành công', 'success');
-        setTimeout(() => { window.location.href = 'index.html'; }, 800);
-      } catch {
-        localStorage.removeItem('jwt');
-      }
-    }
+					showToast('Đăng nhập thành công', 'success');
+					setTimeout(() => {
+						window.location.href = 'index.html';
+					}, 800);
+				} catch {
+					localStorage.removeItem('jwt');
+				}
+			}
 
-    let _toastTimer = null;
-    function showToast(msg, type = 'info', duration = 2200) {
-      const el = document.getElementById('toast');
-      el.textContent = msg;
-      el.className = `toast ${type} show`;
-      clearTimeout(_toastTimer);
-      _toastTimer = setTimeout(() => { el.classList.remove('show'); }, duration);
-    }
+			let _toastTimer = null;
+			function showToast(msg, type = 'info', duration = 2200) {
+				const el = document.getElementById('toast');
+				el.textContent = msg;
+				el.className = `toast ${type} show`;
+				clearTimeout(_toastTimer);
+				_toastTimer = setTimeout(() => {
+					el.classList.remove('show');
+				}, duration);
+			}
 
-    /* =====================================================
+			/* =====================================================
        MODAL
        ===================================================== */
-    function openModal() {
-      document.getElementById('modalCurrentId').textContent = Storage._userId || '—';
-      document.getElementById('modalInput').value = '';
-      document.getElementById('modalConfirm').disabled = true;
-      document.getElementById('modalOverlay').classList.add('open');
-      setTimeout(() => document.getElementById('modalInput').focus(), 200);
-    }
+			function openModal() {
+				document.getElementById('modalCurrentId').textContent = Storage._userId || '—';
+				document.getElementById('modalInput').value = '';
+				document.getElementById('modalConfirm').disabled = true;
+				document.getElementById('modalOverlay').classList.add('open');
+				setTimeout(() => document.getElementById('modalInput').focus(), 200);
+			}
 
-    function closeModal() {
-      document.getElementById('modalOverlay').classList.remove('open');
-    }
+			function closeModal() {
+				document.getElementById('modalOverlay').classList.remove('open');
+			}
 
-    function closeModalOutside(e) {
-      if (e.target === document.getElementById('modalOverlay')) closeModal();
-    }
+			function closeModalOutside(e) {
+				if (e.target === document.getElementById('modalOverlay')) closeModal();
+			}
 
-    function onModalInput(input) {
-      const val = input.value.trim();
-      document.getElementById('modalConfirm').disabled = val.length < 5 || val === Storage._userId;
-    }
+			function onModalInput(input) {
+				const val = input.value.trim();
+				document.getElementById('modalConfirm').disabled = val.length < 5 || val === Storage._userId;
+			}
 
-    function confirmChangeId() {
-      const val = document.getElementById('modalInput').value.trim();
-      if (!val || val.length < 5) return;
-      Storage.setUser(val);
-      closeModal();
-      showToast('Đã đổi ID — đang tải dữ liệu...', 'info');
-    }
+			function confirmChangeId() {
+				const val = document.getElementById('modalInput').value.trim();
+				if (!val || val.length < 5) return;
+				Storage.setUser(val);
+				closeModal();
+				showToast('Đã đổi ID — đang tải dữ liệu...', 'info');
+			}
 
-    /* =====================================================
+			/* =====================================================
        STORAGE LAYER — swap này để chuyển sang CF Worker
        ===================================================== */
-    const Storage = {
-      _workerUrl: 'https://workout-tracker.vuhuuvan-kc.workers.dev',
-      _userId: null,
+			const Storage = {
+				_workerUrl: 'https://workout-tracker.vuhuuvan-kc.workers.dev',
+				_userId: null,
 
-      initUser() {
-        let id = localStorage.getItem('ppl:userId');
-        if (!id) {
-          id = crypto.randomUUID();
-          localStorage.setItem('ppl:userId', id);
-        }
-        this._userId = id;
-        renderUserId();
-      },
+				initUser() {
+					let id = localStorage.getItem('ppl:userId');
+					if (!id) {
+						id = crypto.randomUUID();
+						localStorage.setItem('ppl:userId', id);
+					}
+					this._userId = id;
+					renderUserId();
+				},
 
-      setUser(id) {
-        this._userId = id;
-        localStorage.setItem('ppl:userId', id);
-        renderUserId();
-        loadDay();
-      },
+				setUser(id) {
+					this._userId = id;
+					localStorage.setItem('ppl:userId', id);
+					renderUserId();
+					loadDay();
+				},
 
-      _key(weekKey, day) {
-        return `ppl:${this._userId}:${weekKey}:${day}`;
-      },
+				_key(weekKey, day) {
+					return `ppl:${this._userId}:${weekKey}:${day}`;
+				},
 
-      async get(weekKey, day) {
-        const k = this._key(weekKey, day);
-        if (this._workerUrl) {
-          try {
-            const r = await fetch(`${this._workerUrl}/data?key=${encodeURIComponent(k)}`);
-            return await r.json();
-          } catch { return null; }
-        }
-        const raw = localStorage.getItem(k);
-        return raw ? JSON.parse(raw) : null;
-      },
+				async get(weekKey, day) {
+					const k = this._key(weekKey, day);
+					if (this._workerUrl) {
+						try {
+							const r = await fetch(`${this._workerUrl}/data?key=${encodeURIComponent(k)}`);
+							return await r.json();
+						} catch {
+							return null;
+						}
+					}
+					const raw = localStorage.getItem(k);
+					return raw ? JSON.parse(raw) : null;
+				},
 
-      async set(weekKey, day, data) {
-        const k = this._key(weekKey, day);
-        if (this._workerUrl) {
-          try {
-            await fetch(`${this._workerUrl}/data`, {
-              method: 'PUT',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ key: k, value: data })
-            });
-          } catch { }
-          return;
-        }
-        localStorage.setItem(k, JSON.stringify(data));
-      },
+				async set(weekKey, day, data) {
+					const k = this._key(weekKey, day);
+					if (this._workerUrl) {
+						try {
+							await fetch(`${this._workerUrl}/data`, {
+								method: 'PUT',
+								headers: { 'Content-Type': 'application/json' },
+								body: JSON.stringify({ key: k, value: data }),
+							});
+						} catch {}
+						return;
+					}
+					localStorage.setItem(k, JSON.stringify(data));
+				},
 
-      isRemote() { return !!this._workerUrl; }
-    };
-    /* =====================================================
+				isRemote() {
+					return !!this._workerUrl;
+				},
+			};
+			/* =====================================================
        DỮ LIỆU BÀI TẬP
        ===================================================== */
-    const DAYS = [
-      {
-        id: 'push', label: 'Push', sub: 'T2', color: 'push',
-        exercises: [
-          { id: 'bench', name: 'Bench Press', type: 'comp', schema: '4×5–8', sets: 4, note: 'Chính: Pectoralis major (ngực giữa và dưới). Phụ: Anterior deltoid (vai trước), Triceps brachii.Ổn định: Serratus anterior, Rotator cuff.' },
-          { id: 'incline', name: 'Incline DB Press', type: 'comp', schema: '3×8–12', sets: 3, note: '30–45°. Nhắm upper chest. Chính: Pectoralis major phần upper (clavicular head). Phụ: Anterior deltoid, Triceps. Góc 30–45° càng cao thì vai trước tham gia càng nhiều, ngực càng ít' },
-          { id: 'ohp', name: 'Overhead Press', type: 'comp', schema: '3×8–10', sets: 3, note: 'Barbell hoặc DB đứng/ngồi. Chính: Deltoid (cả 3 đầu, nhưng anterior và lateral chủ yếu). Phụ: Triceps, Upper trapezius, Serratus anterior. Ổn định: Rotator cuff, Core (đứng)' },
-          { id: 'lateral', name: 'Lateral Raise', type: 'iso', schema: '3×12–15', sets: 3, note: 'Tạ đơn nhẹ, giữ 1 giây ở trên.' },
-          { id: 'fly', name: 'Cable/DB Fly', type: 'iso', schema: '3×12–15', sets: 3, note: 'Kéo căng ở đáy chuyển động.' },
-          { id: 'pushdown', name: 'Tricep Pushdown', type: 'iso', schema: '3×10–15', sets: 3, note: 'Cable hoặc dây kháng lực.' },
-          { id: 'triext', name: 'Overhead Tricep Ext.', type: 'iso', schema: '2×12–15', sets: 2, note: 'DB một tay hoặc hai tay.' },
-        ]
-      },
-      {
-        id: 'pull', label: 'Pull', sub: 'T4', color: 'pull',
-        exercises: [
-          { id: 'deadlift', name: 'Deadlift', type: 'comp', schema: '3×4–6', sets: 3, note: 'Conventional hoặc Romanian. Warm-up kỹ. Chính: Erector spinae (dựng cột sống), Gluteus maximus, Hamstrings. Phụ: Quadriceps, Latissimus dorsi, Trapezius (upper + mid), Rhomboids. Ổn định: Core toàn bộ, Forearm/grip. Lưu ý: Đây là bài full-body thực sự, không thuần pull — lý do đặt trong Pull day vì lưng là nhóm cơ chủ yếu' },
-          { id: 'pullup', name: 'Pull-up / Lat Pulldown', type: 'comp', schema: '4×6–10', sets: 4, note: 'Pull-up nếu được; thêm tạ khi ≥12 reps. Chính: Latissimus dorsi (cánh lưng — tạo hình V). Phụ: Biceps brachii, Brachialis, Teres major. Ổn định: Rhomboids, Rear deltoid, Core' },
-          { id: 'bbrow', name: 'Barbell Row', type: 'comp', schema: '3×8–10', sets: 3, note: 'Kiểm soát trọng tâm, không swing. Chính: Latissimus dorsi, Rhomboids, Middle trapezius. Phụ: Biceps, Rear deltoid, Erector spinae (giữ tư thế). So với Pulldown: Row kích thích mid-back (rhomboids, traps) nhiều hơn, Pulldown kích thích lat nhiều hơn.' },
-          { id: 'cablerow', name: 'Seated Row', type: 'comp', schema: '3×10–12', sets: 3, note: 'Kéo về rốn, giữ 1 giây. Chính: Rhomboids, Middle trapezius, Latissimus dorsi. Phụ: Biceps, Rear deltoid. Tư thế ngồi cố định cho phép cô lập mid-back tốt hơn Barbell Row.' },
-          { id: 'facepull', name: 'Face Pull', type: 'iso', schema: '3×15–20', sets: 3, note: 'Quan trọng cho sức khỏe vai.' },
-          { id: 'dbcurl', name: 'Hammer Curl', type: 'iso', schema: '3×10–12', sets: 3, note: 'Alternating hoặc hammer.' },
-          { id: 'ezbarwidecurl', name: 'EZ Bar Wide Curl', type: 'iso', schema: '3×10–12', sets: 3, note: 'Grip rộng nhắm long head.' },
-          { id: 'ezbarnarrowcurl', name: 'EZ Bar Narrow Curl', type: 'iso', schema: '3×8–10', sets: 3, note: 'Grip hẹp nhắm short head.' },
-          { id: 'preacher', name: 'Preacher Curl(EZ Bar, DB)', type: 'iso', schema: '3×10–12', sets: 3, note: 'Khuỷu tay cố định, không swing. Full ROM.' },
-          // Cẳng tay
-          { id: 'revcurl', name: 'Reverse EZ Bar Curl', type: 'iso', schema: '3×12–15', sets: 3, note: 'Overhand grip. Brachioradialis + forearm extensors.' },
-          { id: 'wristcurl', name: 'DB Wrist Curl', type: 'iso', schema: '3×15–20', sets: 3, note: 'Ngồi, cẳng tay tựa đùi, cổ tay gập xuống hết ROM.' },
-          { id: 'revwrist', name: 'DB Reverse Wrist Curl', type: 'iso', schema: '3×15–20', sets: 3, note: 'Ngược lại wrist curl, nhắm forearm extensors.' },
-          { id: 'farmer', name: "Farmer's Carry", type: 'iso', schema: '3×30s', sets: 3, note: 'Tạ nặng, đi thẳng lưng. Grip + forearm tổng thể.' },
-        ]
-      },
-      {
-        id: 'legs', label: 'Legs', sub: 'T6', color: 'legs',
-        exercises: [
-          { id: 'squat', name: 'Barbell Squat', type: 'comp', schema: '4×5–8', sets: 4, note: 'Bài chính. High bar hoặc low bar.' },
-          { id: 'rdl', name: 'Romanian Deadlift', type: 'comp', schema: '3×8–10', sets: 3, note: 'Nhắm hamstring. Cảm nhận căng ở đùi sau.' },
-          { id: 'legpress', name: 'Leg Press', type: 'comp', schema: '3×10–12', sets: 3, note: 'Full ROM. Không khóa gối ở trên.' },
-          { id: 'legext', name: 'Leg Extension', type: 'iso', schema: '3×12–15', sets: 3, note: 'Giữ 1 giây ở đỉnh.' },
-          { id: 'legcurl', name: 'Leg Curl', type: 'iso', schema: '3×12–15', sets: 3, note: 'Lying hoặc seated.' },
-          { id: 'calf', name: 'Standing Calf Raise', type: 'iso', schema: '4×12–20', sets: 4, note: 'Full ROM, tạm dừng ở đáy.' },
-        ]
-      },
-      {
-        id: 'upper', label: 'Upper', sub: 'T7', color: 'upper',
-        exercises: [
-          { id: 'u_bench', name: 'DB Bench Press', type: 'comp', schema: '3×8–10', sets: 3, note: 'Volume thấp hơn Push day chính.' },
-          { id: 'u_pull', name: 'Pull-up / Lat Pulldown', type: 'comp', schema: '3×8–10', sets: 3, note: 'Chọn biến thể khác với Pull day.' },
-          { id: 'u_ohp', name: 'DB Shoulder Press', type: 'comp', schema: '3×10–12', sets: 3, note: '' },
-          { id: 'u_row', name: 'DB Row (single arm)', type: 'comp', schema: '3×10–12', sets: 3, note: '' },
-          { id: 'u_lat', name: 'Lateral Raise', type: 'iso', schema: '2×12–15', sets: 2, note: '' },
-          { id: 'u_arms', name: 'Curl + Tricep Superset', type: 'iso', schema: '2×12', sets: 2, note: 'Superset để tiết kiệm thời gian.' },
-          { id: 'hammer', name: 'Hammer Curl DB', type: 'iso', schema: '3×10–12', sets: 3, note: 'Neutral grip. Nhắm brachialis và brachioradialis.' },
-          { id: 'concurl', name: 'Concentration Curl', type: 'iso', schema: '2×12–15', sets: 2, note: 'Ngồi, khuỷu tựa đùi trong. Siết đỉnh 1 giây.' },
-          { id: 'u_revcurl', name: 'Reverse EZ Bar Curl', type: 'iso', schema: '2×12–15', sets: 2, note: 'Cuối buổi, tạ nhẹ, kiểm soát chuyển động.' },
-        ]
-      }
-    ];
+			const DAYS = [
+				{
+					id: 'push',
+					label: 'Push',
+					sub: 'T2',
+					color: 'push',
+					exercises: [
+						{
+							id: 'bench',
+							name: 'Bench Press',
+							type: 'comp',
+							schema: '4×5–8',
+							sets: 4,
+							note: 'Chính: Pectoralis major (ngực giữa và dưới). Phụ: Anterior deltoid (vai trước), Triceps brachii.Ổn định: Serratus anterior, Rotator cuff.',
+						},
+						{
+							id: 'incline',
+							name: 'Incline Press',
+							type: 'comp',
+							schema: '3×8–12',
+							sets: 3,
+							note: '30–45°. Nhắm upper chest. Chính: Pectoralis major phần upper (clavicular head). Phụ: Anterior deltoid, Triceps. Góc 30–45° càng cao thì vai trước tham gia càng nhiều, ngực càng ít',
+						},
+						{
+							id: 'ohp',
+							name: 'Overhead Press',
+							type: 'comp',
+							schema: '3×8–10',
+							sets: 3,
+							note: 'Barbell hoặc DB đứng/ngồi. Chính: Deltoid (cả 3 đầu, nhưng anterior và lateral chủ yếu). Phụ: Triceps, Upper trapezius, Serratus anterior. Ổn định: Rotator cuff, Core (đứng)',
+						},
+						{ id: 'lateral', name: 'Lateral Raise', type: 'iso', schema: '3×12–15', sets: 3, note: 'Tạ đơn nhẹ, giữ 1 giây ở trên.' },
+						{ id: 'fly', name: 'Cable/DB Fly', type: 'iso', schema: '3×12–15', sets: 3, note: 'Kéo căng ở đáy chuyển động.' },
+						{ id: 'pushdown', name: 'Tricep Pushdown', type: 'iso', schema: '3×10–15', sets: 3, note: 'Cable hoặc dây kháng lực.' },
+						{ id: 'triext', name: 'Overhead Tricep Ext.', type: 'iso', schema: '2×12–15', sets: 2, note: 'DB một tay hoặc hai tay.' },
+					],
+				},
+				{
+					id: 'pull',
+					label: 'Pull',
+					sub: 'T4',
+					color: 'pull',
+					exercises: [
+						{
+							id: 'deadlift',
+							name: 'Deadlift',
+							type: 'comp',
+							schema: '3×4–6',
+							sets: 3,
+							note: 'Conventional hoặc Romanian. Warm-up kỹ. Chính: Erector spinae (dựng cột sống), Gluteus maximus, Hamstrings. Phụ: Quadriceps, Latissimus dorsi, Trapezius (upper + mid), Rhomboids. Ổn định: Core toàn bộ, Forearm/grip. Lưu ý: Đây là bài full-body thực sự, không thuần pull — lý do đặt trong Pull day vì lưng là nhóm cơ chủ yếu',
+						},
+						{
+							id: 'pullup',
+							name: 'Pull-up / Lat Pulldown',
+							type: 'comp',
+							schema: '4×6–10',
+							sets: 4,
+							note: 'Pull-up nếu được; thêm tạ khi ≥12 reps. Chính: Latissimus dorsi (cánh lưng — tạo hình V). Phụ: Biceps brachii, Brachialis, Teres major. Ổn định: Rhomboids, Rear deltoid, Core',
+						},
+						{
+							id: 'bbrow',
+							name: 'Barbell Row',
+							type: 'comp',
+							schema: '3×8–10',
+							sets: 3,
+							note: 'Kiểm soát trọng tâm, không swing. Chính: Latissimus dorsi, Rhomboids, Middle trapezius. Phụ: Biceps, Rear deltoid, Erector spinae (giữ tư thế). So với Pulldown: Row kích thích mid-back (rhomboids, traps) nhiều hơn, Pulldown kích thích lat nhiều hơn.',
+						},
+						{
+							id: 'cablerow',
+							name: 'Seated Row',
+							type: 'comp',
+							schema: '3×10–12',
+							sets: 3,
+							note: 'Kéo về rốn, giữ 1 giây. Chính: Rhomboids, Middle trapezius, Latissimus dorsi. Phụ: Biceps, Rear deltoid. Tư thế ngồi cố định cho phép cô lập mid-back tốt hơn Barbell Row.',
+						},
+						{ id: 'facepull', name: 'Face Pull', type: 'iso', schema: '3×15–20', sets: 3, note: 'Quan trọng cho sức khỏe vai.' },
+						{ id: 'dbcurl', name: 'Hammer Curl', type: 'iso', schema: '3×10–12', sets: 3, note: 'Alternating hoặc hammer.' },
+						{ id: 'ezbarwidecurl', name: 'Wide Curl', type: 'iso', schema: '3×10–12', sets: 3, note: 'Grip rộng nhắm long head.' },
+						{
+							id: 'ezbarnarrowcurl',
+							name: 'Narrow Curl',
+							type: 'iso',
+							schema: '3×8–10',
+							sets: 3,
+							note: 'Grip hẹp nhắm short head.',
+						},
+						{
+							id: 'preacher',
+							name: 'Preacher Curl',
+							type: 'iso',
+							schema: '3×10–12',
+							sets: 3,
+							note: 'Khuỷu tay cố định, không swing. Full ROM.',
+						},
+						// Cẳng tay
+						{
+							id: 'revcurl',
+							name: 'Reverse Curl',
+							type: 'iso',
+							schema: '3×12–15',
+							sets: 3,
+							note: 'Overhand grip. Brachioradialis + forearm extensors.',
+						},
+						{
+							id: 'wristcurl',
+							name: 'Wrist Curl',
+							type: 'iso',
+							schema: '3×15–20',
+							sets: 3,
+							note: 'Ngồi, cẳng tay tựa đùi, cổ tay gập xuống hết ROM.',
+						},
+						{
+							id: 'revwrist',
+							name: 'Reverse Wrist Curl',
+							type: 'iso',
+							schema: '3×15–20',
+							sets: 3,
+							note: 'Ngược lại wrist curl, nhắm forearm extensors.',
+						},
+						{
+							id: 'farmer',
+							name: "Farmer's Carry",
+							type: 'iso',
+							schema: '3×30s',
+							sets: 3,
+							note: 'Tạ nặng, đi thẳng lưng. Grip + forearm tổng thể.',
+						},
+					],
+				},
+				{
+					id: 'legs',
+					label: 'Legs',
+					sub: 'T6',
+					color: 'legs',
+					exercises: [
+						{ id: 'squat', name: 'Barbell Squat', type: 'comp', schema: '4×5–8', sets: 4, note: 'Bài chính. High bar hoặc low bar.' },
+						{
+							id: 'rdl',
+							name: 'Romanian Deadlift',
+							type: 'comp',
+							schema: '3×8–10',
+							sets: 3,
+							note: 'Nhắm hamstring. Cảm nhận căng ở đùi sau.',
+						},
+						{ id: 'legpress', name: 'Leg Press', type: 'comp', schema: '3×10–12', sets: 3, note: 'Full ROM. Không khóa gối ở trên.' },
+						{ id: 'legext', name: 'Leg Extension', type: 'iso', schema: '3×12–15', sets: 3, note: 'Giữ 1 giây ở đỉnh.' },
+						{ id: 'legcurl', name: 'Leg Curl', type: 'iso', schema: '3×12–15', sets: 3, note: 'Lying hoặc seated.' },
+						{ id: 'calf', name: 'Standing Calf Raise', type: 'iso', schema: '4×12–20', sets: 4, note: 'Full ROM, tạm dừng ở đáy.' },
+					],
+				},
+				{
+					id: 'upper',
+					label: 'Upper',
+					sub: 'T7',
+					color: 'upper',
+					exercises: [
+						{ id: 'u_bench', name: 'DB Bench Press', type: 'comp', schema: '3×8–10', sets: 3, note: 'Volume thấp hơn Push day chính.' },
+						{
+							id: 'u_pull',
+							name: 'Pull-up / Lat Pulldown',
+							type: 'comp',
+							schema: '3×8–10',
+							sets: 3,
+							note: 'Chọn biến thể khác với Pull day.',
+						},
+						{ id: 'u_ohp', name: 'DB Shoulder Press', type: 'comp', schema: '3×10–12', sets: 3, note: '' },
+						{ id: 'u_row', name: 'DB Row (single arm)', type: 'comp', schema: '3×10–12', sets: 3, note: '' },
+						{ id: 'u_lat', name: 'Lateral Raise', type: 'iso', schema: '2×12–15', sets: 2, note: '' },
+						{
+							id: 'u_arms',
+							name: 'Curl + Tricep Superset',
+							type: 'iso',
+							schema: '2×12',
+							sets: 2,
+							note: 'Superset để tiết kiệm thời gian.',
+						},
+						{
+							id: 'hammer',
+							name: 'Hammer Curl DB',
+							type: 'iso',
+							schema: '3×10–12',
+							sets: 3,
+							note: 'Neutral grip. Nhắm brachialis và brachioradialis.',
+						},
+						{
+							id: 'concurl',
+							name: 'Concentration Curl',
+							type: 'iso',
+							schema: '2×12–15',
+							sets: 2,
+							note: 'Ngồi, khuỷu tựa đùi trong. Siết đỉnh 1 giây.',
+						},
+						{
+							id: 'u_revcurl',
+							name: 'Reverse EZ Bar Curl',
+							type: 'iso',
+							schema: '2×12–15',
+							sets: 2,
+							note: 'Cuối buổi, tạ nhẹ, kiểm soát chuyển động.',
+						},
+					],
+				},
+			];
 
-    const EQUIPMENT_LABELS = {
-      barbell: 'Barbell',
-      dumbbell: 'Dumbbell',
-      cable: 'Cable',
-      machine: 'Machine',
-      bodyweight: 'Bodyweight',
-      ezbar: 'EZ Bar'
-    };
+			const EQUIPMENT_LABELS = {
+				barbell: 'Barbell',
+				dumbbell: 'Dumbbell',
+				cable: 'Cable',
+				machine: 'Machine',
+				bodyweight: 'Bodyweight',
+				ezbar: 'EZ Bar',
+			};
 
-    const EQUIPMENT_OPTIONS = {
-      bench: ['barbell', 'dumbbell'],
-      incline: ['dumbbell', 'barbell', 'machine'],
-      ohp: ['barbell', 'dumbbell', 'machine'],
-      lateral: ['dumbbell', 'cable', 'machine'],
-      fly: ['cable', 'dumbbell', 'machine'],
-      pushdown: ['cable'],
-      triext: ['dumbbell', 'cable', 'ezbar'],
-      deadlift: ['barbell'],
-      pullup: ['bodyweight', 'cable', 'machine'],
-      bbrow: ['barbell', 'dumbbell', 'cable'],
-      cablerow: ['cable', 'machine'],
-      facepull: ['cable'],
-      dbcurl: ['dumbbell', 'cable'],
-      ezbarwidecurl: ['ezbar', 'barbell', 'cable'],
-      ezbarnarrowcurl: ['dumbbell', 'ezbar', 'cable'],
-      preacher: ['ezbar', 'dumbbell', 'machine'],
-      revcurl: ['ezbar', 'barbell', 'dumbbell'],
-      wristcurl: ['dumbbell', 'barbell'],
-      revwrist: ['dumbbell', 'barbell'],
-      farmer: ['dumbbell', 'barbell'],
-      squat: ['barbell', 'machine'],
-      rdl: ['barbell', 'dumbbell'],
-      legpress: ['machine'],
-      legext: ['machine'],
-      legcurl: ['machine'],
-      calf: ['machine', 'dumbbell', 'barbell'],
-      u_bench: ['dumbbell', 'barbell', 'machine'],
-      u_pull: ['bodyweight', 'cable', 'machine'],
-      u_ohp: ['dumbbell', 'barbell', 'machine'],
-      u_row: ['dumbbell', 'cable', 'machine'],
-      u_lat: ['dumbbell', 'cable', 'machine'],
-      u_arms: ['dumbbell', 'cable', 'ezbar'],
-      hammer: ['dumbbell', 'cable'],
-      concurl: ['dumbbell', 'cable'],
-      u_revcurl: ['ezbar', 'barbell', 'dumbbell']
-    };
+			const EQUIPMENT_OPTIONS = {
+				bench: ['barbell', 'dumbbell'],
+				incline: ['dumbbell', 'barbell', 'machine'],
+				ohp: ['barbell', 'dumbbell', 'machine'],
+				lateral: ['dumbbell', 'cable', 'machine'],
+				fly: ['cable', 'dumbbell', 'machine'],
+				pushdown: ['cable'],
+				triext: ['dumbbell', 'cable', 'ezbar'],
+				deadlift: ['barbell'],
+				pullup: ['bodyweight', 'cable', 'machine'],
+				bbrow: ['barbell', 'dumbbell', 'cable'],
+				cablerow: ['cable', 'machine'],
+				facepull: ['cable'],
+				dbcurl: ['dumbbell', 'cable'],
+				ezbarwidecurl: ['ezbar', 'barbell', 'cable'],
+				ezbarnarrowcurl: ['dumbbell', 'ezbar', 'cable'],
+				preacher: ['ezbar', 'dumbbell', 'machine'],
+				revcurl: ['ezbar', 'barbell', 'dumbbell'],
+				wristcurl: ['dumbbell', 'barbell'],
+				revwrist: ['dumbbell', 'barbell'],
+				farmer: ['dumbbell', 'barbell'],
+				squat: ['barbell', 'machine'],
+				rdl: ['barbell', 'dumbbell'],
+				legpress: ['machine'],
+				legext: ['machine'],
+				legcurl: ['machine'],
+				calf: ['machine', 'dumbbell', 'barbell'],
+				u_bench: ['dumbbell', 'barbell', 'machine'],
+				u_pull: ['bodyweight', 'cable', 'machine'],
+				u_ohp: ['dumbbell', 'barbell', 'machine'],
+				u_row: ['dumbbell', 'cable', 'machine'],
+				u_lat: ['dumbbell', 'cable', 'machine'],
+				u_arms: ['dumbbell', 'cable', 'ezbar'],
+				hammer: ['dumbbell', 'cable'],
+				concurl: ['dumbbell', 'cable'],
+				u_revcurl: ['ezbar', 'barbell', 'dumbbell'],
+			};
 
-    /* =====================================================
+			/* =====================================================
        STATE
        ===================================================== */
-    let currentWeek = getThisWeek();
-    let currentDay = 'push';
-    let dayData = {};  // { exId: { weight, reps:[n,...], done:bool } }
-    let prevData = {};
-    let historyOpen = false;
-    let historyData = {};
-    let openCardIds = new Set();
+			let currentWeek = getThisWeek();
+			let currentDay = 'push';
+			let dayData = {}; // { exId: { weight, reps:[n,...], done:bool } }
+			let prevData = {};
+			let historyOpen = false;
+			let historyData = {};
+			let openCardIds = new Set();
 
-    function getThisWeek() {
-      const now = new Date();
-      const jan1 = new Date(now.getFullYear(), 0, 1);
-      return Math.ceil(((now - jan1) / 86400000 + jan1.getDay() + 1) / 7);
-    }
+			function getThisWeek() {
+				const now = new Date();
+				const jan1 = new Date(now.getFullYear(), 0, 1);
+				return Math.ceil(((now - jan1) / 86400000 + jan1.getDay() + 1) / 7);
+			}
 
-    function getMonthFromWeek(week) {
-      const year = new Date().getFullYear();
-      const jan1 = new Date(year, 0, 1);
-      const date = new Date(jan1.getTime() + (week - 1) * 7 * 86400000);
-      return { month: date.getMonth() + 1, year: date.getFullYear() };
-    }
+			function getMonthFromWeek(week) {
+				const year = new Date().getFullYear();
+				const jan1 = new Date(year, 0, 1);
+				const date = new Date(jan1.getTime() + (week - 1) * 7 * 86400000);
+				return { month: date.getMonth() + 1, year: date.getFullYear() };
+			}
 
-    function weekLabel(w) { return `W${w} / ${new Date().getFullYear()}`; }
+			function weekLabel(w) {
+				return `W${w} / ${new Date().getFullYear()}`;
+			}
 
-    function prevWeek(w) { return w > 1 ? w - 1 : 52; }
+			function prevWeek(w) {
+				return w > 1 ? w - 1 : 52;
+			}
 
-    async function loadDay() {
-      const wk = currentWeek;
-      dayData = (await Storage.get(wk, currentDay)) || {};
-      prevData = (await Storage.get(prevWeek(wk), currentDay)) || {};
-      renderDay();
-    }
+			async function loadDay() {
+				const wk = currentWeek;
+				dayData = (await Storage.get(wk, currentDay)) || {};
+				prevData = (await Storage.get(prevWeek(wk), currentDay)) || {};
+				renderDay();
+			}
 
-    async function saveDay() {
-      await Storage.set(currentWeek, currentDay, dayData);
-    }
+			async function saveDay() {
+				await Storage.set(currentWeek, currentDay, dayData);
+			}
 
-    async function loadHistory() {
-      historyData = {};
-      const day = DAYS.find(d => d.id === currentDay);
-      for (let i = 1; i <= 8; i++) {
-        const wk = currentWeek - i;
-        if (wk < 1) break;
-        const d = await Storage.get(wk, currentDay);
-        if (d && Object.keys(d).length) historyData[wk] = d;
-      }
-      renderHistory(day);
-    }
+			async function loadHistory() {
+				historyData = {};
+				const day = DAYS.find((d) => d.id === currentDay);
+				for (let i = 1; i <= 8; i++) {
+					const wk = currentWeek - i;
+					if (wk < 1) break;
+					const d = await Storage.get(wk, currentDay);
+					if (d && Object.keys(d).length) historyData[wk] = d;
+				}
+				renderHistory(day);
+			}
 
-    /* =====================================================
+			/* =====================================================
        RENDER
        ===================================================== */
-    function renderUserId() {
-      const el = document.getElementById('userIdDisplay');
-      if (!el) return;
-      const id = Storage._userId;
-      el.textContent = id ? id.slice(0, 8) + '...' : '—';
-      el.title = id;
-      const cur = document.getElementById('modalCurrentId');
-      if (cur) cur.textContent = id || '—';
-    }
+			function renderUserId() {
+				const el = document.getElementById('userIdDisplay');
+				if (!el) return;
+				const id = Storage._userId;
+				el.textContent = id ? id.slice(0, 8) + '...' : '—';
+				el.title = id;
+				const cur = document.getElementById('modalCurrentId');
+				if (cur) cur.textContent = id || '—';
+			}
 
-    function copyUserId() {
-      if (!Storage._userId) return;
-      navigator.clipboard.writeText(Storage._userId)
-        .then(() => showToast('Đã copy User ID', 'success'))
-        .catch(() => showToast('Copy thất bại — thử lại', 'info'));
-    }
+			function copyUserId() {
+				if (!Storage._userId) return;
+				navigator.clipboard
+					.writeText(Storage._userId)
+					.then(() => showToast('Đã copy User ID', 'success'))
+					.catch(() => showToast('Copy thất bại — thử lại', 'info'));
+			}
 
-    function changeUserId() {
-      const input = prompt('Nhập User ID từ thiết bị khác:');
-      if (input && input.trim().length > 8) {
-        Storage.setUser(input.trim());
-      }
-    }
+			function changeUserId() {
+				const input = prompt('Nhập User ID từ thiết bị khác:');
+				if (input && input.trim().length > 8) {
+					Storage.setUser(input.trim());
+				}
+			}
 
-    // Sửa hàm init() — thêm Storage.initUser() vào đầu:
-    function init() {
-      Storage.initUser(); // <-- thêm dòng này
-      document.getElementById('storageDot').className = 'cf-dot ' + (Storage.isRemote() ? 'remote' : 'local');
-      document.getElementById('storageLabel').textContent = Storage.isRemote() ? 'Cloudflare Worker' : 'localStorage';
-      renderTabs();
-      updateWeekUI();
-      loadDay();
-    }
+			// Sửa hàm init() — thêm Storage.initUser() vào đầu:
+			function init() {
+				Storage.initUser(); // <-- thêm dòng này
+				document.getElementById('storageDot').className = 'cf-dot ' + (Storage.isRemote() ? 'remote' : 'local');
+				document.getElementById('storageLabel').textContent = Storage.isRemote() ? 'Cloudflare Worker' : 'localStorage';
+				renderTabs();
+				updateWeekUI();
+				loadDay();
+			}
 
-    function renderTabs() {
-      const container = document.getElementById('dayTabs');
-      container.innerHTML = DAYS.map(d =>
-        `<button class="day-tab" data-id="${d.id}" onclick="switchDay('${d.id}')">${d.label} <span style="opacity:.5;font-size:10px; margin-left: 3px;">${d.sub}</span></button>`
-      ).join('');
-      updateTabActive();
-    }
+			function renderTabs() {
+				const container = document.getElementById('dayTabs');
+				container.innerHTML = DAYS.map(
+					(d) =>
+						`<button class="day-tab" data-id="${d.id}" onclick="switchDay('${d.id}')">${d.label} <span style="opacity:.5;font-size:10px; margin-left: 3px;">${d.sub}</span></button>`,
+				).join('');
+				updateTabActive();
+			}
 
-    function updateTabActive() {
-      document.querySelectorAll('.day-tab').forEach(btn => {
-        const active = btn.dataset.id === currentDay;
-        const day = DAYS.find(d => d.id === btn.dataset.id);
-        btn.className = 'day-tab' + (active ? ` active-${day.color}` : '');
-      });
-    }
+			function updateTabActive() {
+				document.querySelectorAll('.day-tab').forEach((btn) => {
+					const active = btn.dataset.id === currentDay;
+					const day = DAYS.find((d) => d.id === btn.dataset.id);
+					btn.className = 'day-tab' + (active ? ` active-${day.color}` : '');
+				});
+			}
 
-    function updateWeekUI() {
-      const m = getMonthFromWeek(currentWeek);
-      console.log(m);
-      document.getElementById('weekLabel').textContent = weekLabel(currentWeek);
-      document.getElementById('headerWeek').textContent = `Tuần ${currentWeek} ( Tháng ${m.month}/${m.year} )`;
-    }
+			function updateWeekUI() {
+				const m = getMonthFromWeek(currentWeek);
+				console.log(m);
+				document.getElementById('weekLabel').textContent = weekLabel(currentWeek);
+				document.getElementById('headerWeek').textContent = `Tuần ${currentWeek} ( Tháng ${m.month}/${m.year} )`;
+			}
 
-    function switchDay(id) {
-      currentDay = id;
-      historyOpen = false;
-      openCardIds.clear();
-      updateTabActive();
-      loadDay();
-    }
+			function switchDay(id) {
+				currentDay = id;
+				historyOpen = false;
+				openCardIds.clear();
+				updateTabActive();
+				loadDay();
+			}
 
-    function changeWeek(delta) {
-      currentWeek = Math.max(1, Math.min(52, currentWeek + delta));
-      openCardIds.clear();
-      updateWeekUI();
-      loadDay();
-    }
+			function changeWeek(delta) {
+				currentWeek = Math.max(1, Math.min(52, currentWeek + delta));
+				openCardIds.clear();
+				updateWeekUI();
+				loadDay();
+			}
 
-    function getDayExData(exId) {
-      if (!dayData[exId]) dayData[exId] = { weight: '', reps: [], done: false };
-      if (!dayData[exId].reps) dayData[exId].reps = [];
-      if (dayData[exId].equipment === undefined) dayData[exId].equipment = '';
-      return dayData[exId];
-    }
+			function getDayExData(exId) {
+				if (!dayData[exId]) dayData[exId] = { weight: '', reps: [], done: false };
+				if (!dayData[exId].reps) dayData[exId].reps = [];
+				if (dayData[exId].equipment === undefined) dayData[exId].equipment = '';
+				return dayData[exId];
+			}
 
-    function getEquipmentOptions(ex) {
-      return EQUIPMENT_OPTIONS[ex.id] || ['barbell', 'dumbbell', 'cable'];
-    }
+			function getEquipmentOptions(ex) {
+				return EQUIPMENT_OPTIONS[ex.id] || ['barbell', 'dumbbell', 'cable'];
+			}
 
-    function renderEquipmentOptions(ex, data, dayColor) {
-      const options = getEquipmentOptions(ex);
-      const selected = data.equipment || '';
-      const color = `var(--${dayColor})`;
+			function renderEquipmentOptions(ex, data, dayColor) {
+				const options = getEquipmentOptions(ex);
+				const selected = data.equipment || '';
+				const color = `var(--${dayColor})`;
 
-      return `
+				return `
         <div class="equipment-row">
           <span class="equipment-label">Thiết bị ${selected ? '' : '<span style="color:var(--hint);font-family:var(--sans);font-size:11px;">(chưa chọn)</span>'}</span>
           <div class="equipment-options" style="--equipment-cols:${options.length};--active-color:${color};">
-            ${options.map(opt => `
+            ${options
+							.map(
+								(opt) => `
               <button type="button"
                 class="equipment-btn ${selected === opt ? 'active' : ''}"
                 onclick="setEquipment(event,'${ex.id}','${opt}')">
                 ${EQUIPMENT_LABELS[opt] || opt}
               </button>
-            `).join('')}
+            `,
+							)
+							.join('')}
           </div>
         </div>`;
-    }
+			}
 
-    function renderDay() {
-      const day = DAYS.find(d => d.id === currentDay);
-      const completed = day.exercises.filter(e => getDayExData(e.id).done).length;
-      const total = day.exercises.length;
-      const pct = total ? Math.round(completed / total * 100) : 0;
-      const color = `var(--${day.color})`;
+			function renderDay() {
+				const day = DAYS.find((d) => d.id === currentDay);
+				const completed = day.exercises.filter((e) => getDayExData(e.id).done).length;
+				const total = day.exercises.length;
+				const pct = total ? Math.round((completed / total) * 100) : 0;
+				const color = `var(--${day.color})`;
 
-      let html = `
+				let html = `
     <div class="day-panel">
       <div class="day-summary">
         <span class="day-progress-text">${completed} / ${total} bài hoàn thành</span>
@@ -1516,11 +1737,11 @@
         </div>
       </div>`;
 
-      day.exercises.forEach(ex => {
-        html += renderExCard(ex, day.color);
-      });
+				day.exercises.forEach((ex) => {
+					html += renderExCard(ex, day.color);
+				});
 
-      html += `
+				html += `
       <button class="history-btn" onclick="toggleHistory()">
         &#x2195; Lịch sử các tuần trước
       </button>
@@ -1530,44 +1751,44 @@
       </div>
     </div>`;
 
-      document.getElementById('dayContent').innerHTML = html;
+				document.getElementById('dayContent').innerHTML = html;
 
-      if (historyOpen) loadHistory();
-    }
+				if (historyOpen) loadHistory();
+			}
 
-    function renderExCard(ex, dayColor) {
-      const data = getDayExData(ex.id);
-      const prev = prevData[ex.id] || {};
-      const isOpen = openCardIds.has(ex.id);
-      const isDone = data.done;
+			function renderExCard(ex, dayColor) {
+				const data = getDayExData(ex.id);
+				const prev = prevData[ex.id] || {};
+				const isOpen = openCardIds.has(ex.id);
+				const isDone = data.done;
 
-      let setsHtml = '';
-      const cols = ex.sets;
+				let setsHtml = '';
+				const cols = ex.sets;
 
-      const headers = Array.from({ length: cols }, (_, i) => `<span class="set-col-label">S${i + 1}</span>`).join('');
-      const repInputs = Array.from({ length: cols }, (_, i) => {
-        const val = data.reps[i] !== undefined ? data.reps[i] : '';
-        const hasVal = val !== '';
-        const prevVal = (prev.reps || [])[i];
-        let cls = 'rep-input' + (hasVal ? ' has-val' : '');
-        return `<input type="number" class="${cls}" value="${val}" min="0" max="50"
+				const headers = Array.from({ length: cols }, (_, i) => `<span class="set-col-label">S${i + 1}</span>`).join('');
+				const repInputs = Array.from({ length: cols }, (_, i) => {
+					const val = data.reps[i] !== undefined ? data.reps[i] : '';
+					const hasVal = val !== '';
+					const prevVal = (prev.reps || [])[i];
+					let cls = 'rep-input' + (hasVal ? ' has-val' : '');
+					return `<input type="number" class="${cls}" value="${val}" min="0" max="50"
       data-ex="${ex.id}" data-set="${i}"
       oninput="onRepInput(this)" onchange="onRepChange(this)">`;
-      }).join('');
+				}).join('');
 
-      const prevVals = Array.from({ length: cols }, (_, i) => {
-        const prevVal = (prev.reps || [])[i];
-        const curVal = data.reps[i];
-        if (prevVal === undefined) return `<span class="prev-val">—</span>`;
-        let cls = 'prev-val';
-        if (curVal !== undefined && curVal !== '') {
-          if (curVal > prevVal) cls += ' higher';
-          else if (curVal < prevVal) cls += ' lower';
-        }
-        return `<span class="${cls}">${prevVal}</span>`;
-      }).join('');
+				const prevVals = Array.from({ length: cols }, (_, i) => {
+					const prevVal = (prev.reps || [])[i];
+					const curVal = data.reps[i];
+					if (prevVal === undefined) return `<span class="prev-val">—</span>`;
+					let cls = 'prev-val';
+					if (curVal !== undefined && curVal !== '') {
+						if (curVal > prevVal) cls += ' higher';
+						else if (curVal < prevVal) cls += ' lower';
+					}
+					return `<span class="${cls}">${prevVal}</span>`;
+				}).join('');
 
-      setsHtml = `
+				setsHtml = `
     <div class="sets-header" style="--cols:${cols}">
       <span></span>${headers}
     </div>
@@ -1580,11 +1801,11 @@
       </div>
     </div>`;
 
-      const prevWeight = prev.weight ? `prev: ${prev.weight}kg` : '';
-      const prevEquipment = prev.equipment ? ` · ${EQUIPMENT_LABELS[prev.equipment] || prev.equipment}` : '';
-      const poHint = computePoHint(ex, data, prev);
+				const prevWeight = prev.weight ? `prev: ${prev.weight}kg` : '';
+				const prevEquipment = prev.equipment ? ` · ${EQUIPMENT_LABELS[prev.equipment] || prev.equipment}` : '';
+				const poHint = computePoHint(ex, data, prev);
 
-      return `
+				return `
     <div class="ex-card ${isDone ? 'completed' : ''} ${isOpen && !isDone ? 'open' : ''}" id="card-${ex.id}">
       <div class="ex-header" onclick="toggleCard('${ex.id}')">
         <div class="ex-check" onclick="toggleDone(event,'${ex.id}')">
@@ -1612,157 +1833,156 @@
         ${ex.note ? `<div class="ex-note">${ex.note}</div>` : ''}
       </div>
     </div>`;
-    }
+			}
 
-    function computePoHint(ex, data, prev) {
-      const reps = data.reps.filter(r => r !== '' && r !== undefined);
-      if (!reps.length) return { cls: '', msg: '' };
+			function computePoHint(ex, data, prev) {
+				const reps = data.reps.filter((r) => r !== '' && r !== undefined);
+				if (!reps.length) return { cls: '', msg: '' };
 
-      const schemaMatch = ex.schema.match(/(\d+)–(\d+)/);
-      if (!schemaMatch) return { cls: '', msg: '' };
-      const topRep = parseInt(schemaMatch[2]);
-      const allAtTop = reps.length === ex.sets && reps.every(r => parseInt(r) >= topRep);
+				const schemaMatch = ex.schema.match(/(\d+)–(\d+)/);
+				if (!schemaMatch) return { cls: '', msg: '' };
+				const topRep = parseInt(schemaMatch[2]);
+				const allAtTop = reps.length === ex.sets && reps.every((r) => parseInt(r) >= topRep);
 
-      if (allAtTop) return { cls: 'increase', msg: `Tất cả sets đạt ${topRep} reps — tang ta o buoi sau!` };
+				if (allAtTop) return { cls: 'increase', msg: `Tất cả sets đạt ${topRep} reps — tang ta o buoi sau!` };
 
-      const allSets = reps.length === ex.sets;
-      const avgRep = reps.reduce((a, b) => a + parseInt(b), 0) / reps.length;
-      if (allSets && avgRep >= topRep - 1) return { cls: 'almost', msg: `Con rat gan! Them 1 rep nua la tang ta duoc.` };
+				const allSets = reps.length === ex.sets;
+				const avgRep = reps.reduce((a, b) => a + parseInt(b), 0) / reps.length;
+				if (allSets && avgRep >= topRep - 1) return { cls: 'almost', msg: `Con rat gan! Them 1 rep nua la tang ta duoc.` };
 
-      const prevReps = (prev.reps || []).filter(r => r !== '' && r !== undefined);
-      if (prevReps.length && reps.length) {
-        const prevAvg = prevReps.reduce((a, b) => a + parseInt(b), 0) / prevReps.length;
-        if (avgRep > prevAvg) return { cls: 'great', msg: `Tang trung binh ${(avgRep - prevAvg).toFixed(1)} reps so voi tuan truoc.` };
-      }
-      return { cls: '', msg: '' };
-    }
+				const prevReps = (prev.reps || []).filter((r) => r !== '' && r !== undefined);
+				if (prevReps.length && reps.length) {
+					const prevAvg = prevReps.reduce((a, b) => a + parseInt(b), 0) / prevReps.length;
+					if (avgRep > prevAvg) return { cls: 'great', msg: `Tang trung binh ${(avgRep - prevAvg).toFixed(1)} reps so voi tuan truoc.` };
+				}
+				return { cls: '', msg: '' };
+			}
 
-    function renderHistory(day) {
-      const body = document.getElementById('historyBody');
-      if (!body) return;
-      if (!Object.keys(historyData).length) {
-        body.innerHTML = '<div class="empty-history">Chưa có dữ liệu tuần trước.</div>';
-        return;
-      }
-      let html = '';
-      day.exercises.forEach(ex => {
-        const weeks = Object.entries(historyData).sort((a, b) => b[0] - a[0]);
-        const hasAny = weeks.some(([, d]) => d[ex.id] && (d[ex.id].weight || d[ex.id].reps?.length));
-        if (!hasAny) return;
-        html += `<div class="history-ex"><div class="history-ex-name">${ex.name}</div>`;
-        weeks.forEach(([wk, d], idx) => {
-          const exd = d[ex.id];
-          if (!exd) return;
-          const repsStr = (exd.reps || []).filter(r => r !== '' && r !== undefined).join(' / ') || '—';
-          const wStr = exd.weight ? `${exd.weight}kg` : '—';
-          const equipmentStr = exd.equipment ? ` · ${EQUIPMENT_LABELS[exd.equipment] || exd.equipment}` : '';
-          let delta = '';
-          if (idx < weeks.length - 1) {
-            const nextWk = weeks[idx + 1];
-            const nextW = nextWk && nextWk[1][ex.id]?.weight;
-            if (nextW && exd.weight && exd.weight > nextW) {
-              delta = `<span class="hw-delta up">+${(exd.weight - nextW).toFixed(1)}kg</span>`;
-            }
-          }
-          html += `<div class="history-week-row">
+			function renderHistory(day) {
+				const body = document.getElementById('historyBody');
+				if (!body) return;
+				if (!Object.keys(historyData).length) {
+					body.innerHTML = '<div class="empty-history">Chưa có dữ liệu tuần trước.</div>';
+					return;
+				}
+				let html = '';
+				day.exercises.forEach((ex) => {
+					const weeks = Object.entries(historyData).sort((a, b) => b[0] - a[0]);
+					const hasAny = weeks.some(([, d]) => d[ex.id] && (d[ex.id].weight || d[ex.id].reps?.length));
+					if (!hasAny) return;
+					html += `<div class="history-ex"><div class="history-ex-name">${ex.name}</div>`;
+					weeks.forEach(([wk, d], idx) => {
+						const exd = d[ex.id];
+						if (!exd) return;
+						const repsStr = (exd.reps || []).filter((r) => r !== '' && r !== undefined).join(' / ') || '—';
+						const wStr = exd.weight ? `${exd.weight}kg` : '—';
+						const equipmentStr = exd.equipment ? ` · ${EQUIPMENT_LABELS[exd.equipment] || exd.equipment}` : '';
+						let delta = '';
+						if (idx < weeks.length - 1) {
+							const nextWk = weeks[idx + 1];
+							const nextW = nextWk && nextWk[1][ex.id]?.weight;
+							if (nextW && exd.weight && exd.weight > nextW) {
+								delta = `<span class="hw-delta up">+${(exd.weight - nextW).toFixed(1)}kg</span>`;
+							}
+						}
+						html += `<div class="history-week-row">
         <span class="hw-label">W${wk}</span>
         <span class="hw-val">${wStr}${equipmentStr} — ${repsStr}</span>
         ${delta}
       </div>`;
-        });
-        html += `</div>`;
-      });
-      body.innerHTML = html || '<div class="empty-history">Chưa có dữ liệu.</div>';
-    }
+					});
+					html += `</div>`;
+				});
+				body.innerHTML = html || '<div class="empty-history">Chưa có dữ liệu.</div>';
+			}
 
-    /* =====================================================
+			/* =====================================================
        EVENT HANDLERS
        ===================================================== */
-    function toggleCard(exId) {
-      const card = document.getElementById('card-' + exId);
-      if (!card) return;
-      const isOpen = card.classList.toggle('open');
-      if (isOpen) openCardIds.add(exId);
-      else openCardIds.delete(exId);
-    }
+			function toggleCard(exId) {
+				const card = document.getElementById('card-' + exId);
+				if (!card) return;
+				const isOpen = card.classList.toggle('open');
+				if (isOpen) openCardIds.add(exId);
+				else openCardIds.delete(exId);
+			}
 
-    function toggleDone(event, exId) {
-      event.stopPropagation();
-      const data = getDayExData(exId);
-      data.done = !data.done;
-      saveDay();
-      renderDay();
-    }
+			function toggleDone(event, exId) {
+				event.stopPropagation();
+				const data = getDayExData(exId);
+				data.done = !data.done;
+				saveDay();
+				renderDay();
+			}
 
-    function onWeightInput(input) {
-      const exId = input.dataset.ex;
-      getDayExData(exId).weight = input.value;
-      saveDay();
-    }
+			function onWeightInput(input) {
+				const exId = input.dataset.ex;
+				getDayExData(exId).weight = input.value;
+				saveDay();
+			}
 
-    function setEquipment(event, exId, equipment) {
-      event.stopPropagation();
-      getDayExData(exId).equipment = equipment;
-      saveDay();
-      renderDay();
-    }
+			function setEquipment(event, exId, equipment) {
+				event.stopPropagation();
+				getDayExData(exId).equipment = equipment;
+				saveDay();
+				renderDay();
+			}
 
-    function onRepInput(input) {
-      const exId = input.dataset.ex;
-      const setIdx = parseInt(input.dataset.set);
-      const data = getDayExData(exId);
-      if (!data.reps) data.reps = [];
-      data.reps[setIdx] = input.value === '' ? '' : parseInt(input.value);
-      input.classList.toggle('has-val', input.value !== '');
-      const ex = DAYS.flatMap(d => d.exercises).find(e => e.id === exId);
-      const prev = prevData[exId] || {};
-      const hint = computePoHint(ex, data, prev);
-      const hintEl = document.getElementById('hint-' + exId);
-      if (hintEl) {
-        hintEl.textContent = hint.msg;
-        hintEl.className = `po-hint ${hint.cls} ${hint.msg ? 'show' : ''}`;
-      }
-      updatePrevHighlight(exId);
-      saveDay();
-    }
+			function onRepInput(input) {
+				const exId = input.dataset.ex;
+				const setIdx = parseInt(input.dataset.set);
+				const data = getDayExData(exId);
+				if (!data.reps) data.reps = [];
+				data.reps[setIdx] = input.value === '' ? '' : parseInt(input.value);
+				input.classList.toggle('has-val', input.value !== '');
+				const ex = DAYS.flatMap((d) => d.exercises).find((e) => e.id === exId);
+				const prev = prevData[exId] || {};
+				const hint = computePoHint(ex, data, prev);
+				const hintEl = document.getElementById('hint-' + exId);
+				if (hintEl) {
+					hintEl.textContent = hint.msg;
+					hintEl.className = `po-hint ${hint.cls} ${hint.msg ? 'show' : ''}`;
+				}
+				updatePrevHighlight(exId);
+				saveDay();
+			}
 
-    function onRepChange(input) {
-      saveDay();
-    }
+			function onRepChange(input) {
+				saveDay();
+			}
 
-    function updatePrevHighlight(exId) {
-      const data = getDayExData(exId);
-      const prev = prevData[exId] || {};
-      const card = document.getElementById('card-' + exId);
-      if (!card) return;
-      card.querySelectorAll('.prev-val').forEach((el, i) => {
-        const prevVal = (prev.reps || [])[i];
-        const curVal = data.reps[i];
-        el.className = 'prev-val';
-        if (prevVal !== undefined && curVal !== undefined && curVal !== '') {
-          if (curVal > prevVal) el.classList.add('higher');
-          else if (curVal < prevVal) el.classList.add('lower');
-        }
-      });
-    }
+			function updatePrevHighlight(exId) {
+				const data = getDayExData(exId);
+				const prev = prevData[exId] || {};
+				const card = document.getElementById('card-' + exId);
+				if (!card) return;
+				card.querySelectorAll('.prev-val').forEach((el, i) => {
+					const prevVal = (prev.reps || [])[i];
+					const curVal = data.reps[i];
+					el.className = 'prev-val';
+					if (prevVal !== undefined && curVal !== undefined && curVal !== '') {
+						if (curVal > prevVal) el.classList.add('higher');
+						else if (curVal < prevVal) el.classList.add('lower');
+					}
+				});
+			}
 
-    async function toggleHistory() {
-      historyOpen = !historyOpen;
-      const panel = document.getElementById('historyPanel');
-      if (!panel) return;
-      panel.classList.toggle('open', historyOpen);
-      if (historyOpen) {
-        const day = DAYS.find(d => d.id === currentDay);
-        await loadHistory();
-        renderHistory(day);
-      }
-    }
+			async function toggleHistory() {
+				historyOpen = !historyOpen;
+				const panel = document.getElementById('historyPanel');
+				if (!panel) return;
+				panel.classList.toggle('open', historyOpen);
+				if (historyOpen) {
+					const day = DAYS.find((d) => d.id === currentDay);
+					await loadHistory();
+					renderHistory(day);
+				}
+			}
 
-    /* =====================================================
+			/* =====================================================
        BOOT
        ===================================================== */
-    init();
-  </script>
-</body>
-
+			init();
+		</script>
+	</body>
 </html>
