@@ -5,7 +5,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Workout Tracker</title>
-  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="icon" type="image/x-icon" href="../favicon.ico">
+
   <style>
     @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap');
 
@@ -18,14 +19,15 @@
     }
 
     :root {
-      --bg: #0f0f0f;
-      --surface: #181818;
-      --surface2: #222222;
-      --border: #2a2a2a;
-      --border2: #333;
-      --text: #e8e8e8;
-      --muted: #FFF;
-      --hint: #f3f3f3;
+      --bg: #090a0c;
+      --surface: #14171b;
+      --surface2: #1b2026;
+      --surface3: #232932;
+      --border: #262d36;
+      --border2: #343d49;
+      --text: #f5f7fb;
+      --muted: #b7bfcc;
+      --hint: #7e8796;
       --push: #a78bfa;
       --push-dim: #3b2f6b;
       --pull: #34d399;
@@ -44,7 +46,7 @@
 
     body {
       font-family: var(--sans);
-      background: var(--bg);
+      background: radial-gradient(circle at top, #171b22 0, var(--bg) 340px);
       color: var(--text);
       min-height: 100vh;
       font-size: 14px;
@@ -58,7 +60,7 @@
     .app {
       max-width: 680px;
       margin: 0 auto;
-      padding: 0 0 80px;
+      padding: 0 0 96px;
     }
 
     /* Header */
@@ -66,19 +68,19 @@
       position: sticky;
       top: 0;
       z-index: 50;
-      background: var(--bg);
+      background: rgba(9, 10, 12, .92);
+      backdrop-filter: blur(18px);
       border-bottom: 1px solid var(--border);
-      padding: 14px 20px;
+      padding: 16px 20px;
       display: flex;
       align-items: center;
       justify-content: space-between;
     }
 
     .header-title {
-      font-family: var(--mono);
-      font-size: 13px;
-      font-weight: 500;
-      letter-spacing: .04em;
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 0;
       color: var(--text);
     }
 
@@ -96,9 +98,9 @@
     }
 
     .week-btn {
-      width: 28px;
-      height: 28px;
-      border-radius: 6px;
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
       border: 1px solid var(--border2);
       background: transparent;
       color: var(--muted);
@@ -117,18 +119,18 @@
 
     .week-label {
       font-family: var(--mono);
-      font-size: 11px;
+      font-size: 12px;
       color: var(--text);
-      min-width: 52px;
+      min-width: 70px;
       text-align: center;
     }
 
     /* Day tabs */
     .day-tabs {
       display: flex;
-      gap: 0;
-      border-bottom: 1px solid var(--border);
-      padding: 0 20px;
+      gap: 8px;
+      border-bottom: none;
+      padding: 14px 20px 8px;
       overflow-x: auto;
       scrollbar-width: none;
     }
@@ -138,13 +140,15 @@
     }
 
     .day-tab {
-      padding: 10px 16px;
-      font-size: 12px;
-      font-weight: 500;
+      flex: 1 0 auto;
+      min-width: 82px;
+      padding: 12px 16px;
+      font-size: 13px;
+      font-weight: 700;
       color: var(--muted);
       border: none;
-      background: transparent;
-      border-bottom: 2px solid transparent;
+      background: var(--surface);
+      border-radius: 999px;
       cursor: pointer;
       white-space: nowrap;
       transition: all .15s;
@@ -157,27 +161,27 @@
 
     .day-tab.active-push {
       color: var(--push);
-      border-bottom-color: var(--push);
+      background: var(--push-dim);
     }
 
     .day-tab.active-pull {
       color: var(--pull);
-      border-bottom-color: var(--pull);
+      background: var(--pull-dim);
     }
 
     .day-tab.active-legs {
       color: var(--legs);
-      border-bottom-color: var(--legs);
+      background: var(--legs-dim);
     }
 
     .day-tab.active-upper {
       color: var(--upper);
-      border-bottom-color: var(--upper);
+      background: var(--upper-dim);
     }
 
     /* Day panel */
     .day-panel {
-      padding: 16px 20px;
+      padding: 12px 20px;
     }
 
     .day-summary {
@@ -185,6 +189,10 @@
       align-items: center;
       justify-content: space-between;
       margin-bottom: 14px;
+      padding: 14px;
+      background: linear-gradient(135deg, rgba(255, 255, 255, .05), rgba(255, 255, 255, .02));
+      border: 1px solid var(--border);
+      border-radius: 14px;
     }
 
     .day-progress-text {
@@ -194,10 +202,10 @@
     }
 
     .progress-bar-wrap {
-      width: 100px;
-      height: 3px;
-      background: var(--border2);
-      border-radius: 2px;
+      width: 120px;
+      height: 6px;
+      background: var(--surface3);
+      border-radius: 999px;
       overflow: hidden;
     }
 
@@ -210,10 +218,11 @@
     /* Exercise card */
     .ex-card {
       border: 1px solid var(--border);
-      border-radius: 10px;
-      margin-bottom: 8px;
+      border-radius: 14px;
+      margin-bottom: 10px;
       overflow: hidden;
       transition: border-color .15s;
+      background: rgba(20, 23, 27, .92);
     }
 
     .ex-card.completed {
@@ -224,7 +233,8 @@
       display: flex;
       align-items: center;
       gap: 10px;
-      padding: 11px 14px;
+      min-height: 58px;
+      padding: 13px 14px;
       cursor: pointer;
       background: var(--surface);
       user-select: none;
@@ -235,9 +245,9 @@
     }
 
     .ex-check {
-      width: 18px;
-      height: 18px;
-      border-radius: 5px;
+      width: 24px;
+      height: 24px;
+      border-radius: 8px;
       border: 1.5px solid var(--border2);
       flex-shrink: 0;
       display: flex;
@@ -261,7 +271,7 @@
 
     .ex-name {
       font-weight: 500;
-      font-size: 13px;
+      font-size: 15px;
       flex: 1;
     }
 
@@ -309,7 +319,7 @@
     /* Sets body */
     .ex-body {
       display: none;
-      padding: 12px 14px 14px;
+      padding: 14px;
       border-top: 1px solid var(--border);
     }
 
@@ -321,7 +331,7 @@
       display: flex;
       align-items: center;
       gap: 8px;
-      margin-bottom: 12px;
+      margin-bottom: 14px;
     }
 
     .weight-label {
@@ -331,14 +341,14 @@
 
     .weight-input {
       font-family: var(--mono);
-      font-size: 13px;
+      font-size: 18px;
       font-weight: 500;
       background: var(--surface2);
       border: 1px solid var(--border2);
       color: var(--text);
-      border-radius: 6px;
-      padding: 4px 8px;
-      width: 80px;
+      border-radius: 10px;
+      padding: 9px 10px;
+      width: 96px;
       text-align: center;
     }
 
@@ -361,13 +371,13 @@
 
     .sets-grid {
       display: grid;
-      gap: 6px;
+      gap: 8px;
     }
 
     .sets-header {
       display: grid;
       grid-template-columns: 36px repeat(var(--cols), 1fr);
-      gap: 6px;
+      gap: 8px;
       margin-bottom: 4px;
     }
 
@@ -381,7 +391,7 @@
     .set-row {
       display: grid;
       grid-template-columns: 36px repeat(var(--cols), 1fr);
-      gap: 6px;
+      gap: 8px;
       align-items: center;
     }
 
@@ -393,13 +403,14 @@
 
     .rep-input {
       font-family: var(--mono);
-      font-size: 13px;
+      font-size: 17px;
       font-weight: 500;
       background: var(--surface2);
       border: 1px solid var(--border);
       color: var(--text);
-      border-radius: 6px;
-      padding: 5px 4px;
+      border-radius: 10px;
+      min-height: 46px;
+      padding: 8px 4px;
       text-align: center;
       width: 100%;
       transition: border-color .15s, background .15s;
@@ -470,6 +481,43 @@
       font-size: 11px;
       color: var(--hint);
       font-style: italic;
+    }
+
+    .equipment-row {
+      margin-bottom: 14px;
+    }
+
+    .equipment-label {
+      display: block;
+      margin-bottom: 7px;
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 11px;
+    }
+
+    .equipment-options {
+      display: grid;
+      grid-template-columns: repeat(var(--equipment-cols), 1fr);
+      gap: 7px;
+    }
+
+    .equipment-btn {
+      min-height: 40px;
+      border: 1px solid var(--border2);
+      border-radius: 10px;
+      background: var(--surface2);
+      color: var(--muted);
+      font-family: var(--sans);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: border-color .15s, background .15s, color .15s;
+    }
+
+    .equipment-btn.active {
+      border-color: var(--active-color);
+      background: color-mix(in srgb, var(--active-color) 18%, var(--surface2));
+      color: var(--text);
     }
 
     /* History */
@@ -806,17 +854,26 @@
     }
 
     @media (max-width: 600px) {
+      body {
+        font-size: 15px;
+      }
+
+      .app {
+        max-width: none;
+      }
+
       .header {
         display: block;
+        padding: 14px 16px;
       }
 
       .header .header-btn {
         justify-content: space-between;
-        margin-bottom: 15px;
+        margin-bottom: 14px;
       }
 
       .day-tabs {
-        justify-content: space-between;
+        padding: 12px 16px 8px;
       }
 
       .header-wrapper {
@@ -826,6 +883,36 @@
 
       .header-wrapper .cf-badge {
         align-self: flex-end;
+      }
+
+      .day-panel {
+        padding: 10px 16px 18px;
+      }
+
+      .day-summary {
+        align-items: flex-start;
+        gap: 12px;
+      }
+
+      .progress-bar-wrap {
+        width: 112px;
+      }
+
+      .ex-type {
+        display: none;
+      }
+
+      .ex-schema {
+        font-size: 10px;
+      }
+
+      .sets-header,
+      .set-row {
+        grid-template-columns: 34px repeat(var(--cols), minmax(0, 1fr));
+      }
+
+      .rep-input {
+        min-height: 50px;
       }
     }
   </style>
@@ -848,7 +935,10 @@
             ID</button>
         </div>
       </div>
-      <div class="header-wrapper" style="display:flex;align-items:center;gap:12px;">
+      <div class="header-wrapper"
+        style="display:flex; flex-direction:column; flex-wrap:wrap; align-items:center;gap:12px;">
+        <button onclick="logout()"
+          style="font-size:11px;background:none; align-self: flex-end; border:1px solid var(--border2);color:var(--muted);cursor:pointer;padding:3px 10px;border-radius:5px;font-family:var(--sans);">Logout</button>
         <span class="cf-badge" id="storageBadge">
           <span class="cf-dot local" id="storageDot"></span>
           <span id="storageLabel" style="color:#fff;">localStorage</span>
@@ -865,63 +955,70 @@
     <div id="dayContent"></div>
 
     <div id="work-out-note">
-      <table>
-        <thead>
-          <tr>
-            <th>Nhóm cơ</th>
-            <th>Push</th>
-            <th>Pull</th>
-          </tr>
-        </thead>
-        <tbody style="margin-top: 15px;">
-          <tr>
-            <td>Ngực (Pectoralis)</td>
-            <td>Bench Press, Incline Press</td>
-            <td style="text-align: center;">—</td>
-          </tr>
-          <tr>
-            <td>Vai trước (Anterior deltoid)</td>
-            <td>OHP, Incline Press, Bench Press</td>
-            <td style="text-align: center;">—</td>
-          </tr>
-          <tr>
-            <td>Vai giữa (Lateral deltoid)</td>
-            <td>OHP</td>
-            <td style="text-align: center;">—</td>
-          </tr>
-          <tr>
-            <td>Tay sau (Triceps)</td>
-            <td>Bench Press, Incline Press, OHP</td>
-            <td style="text-align: center;">—</td>
-          </tr>
-          <tr>
-            <td>Lưng rộng (Latissimus dorsi)</td>
-            <td style="text-align: center;">—</td>
-            <td>Pull-up, Lat Pulldown, Row</td>
-          </tr>
-          <tr>
-            <td>Lưng giữa (Rhomboids / Mid traps)</td>
-            <td style="text-align: center;">—</td>
-            <td>Barbell Row, Cable Row</td>
-          </tr>
-          <tr>
-            <td>Lưng dưới (Erector spinae)</td>
-            <td style="text-align: center;">—</td>
-            <td>Deadlift</td>
-          </tr>
-          <tr>
-            <td>Mông + Đùi sau (Glutes / Hamstrings)</td>
-            <td style="text-align: center;">—</td>
-            <td>Deadlift</td>
-          </tr>
-          <tr>
-            <td>Tay trước (Biceps)</td>
-            <td style="text-align: center;">—</td>
-            <td>Pull-up, Row, Cable Row</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+  <details>
+    <summary>Push</summary>
+    <table>
+      <thead>
+        <tr>
+          <th>Nhóm cơ</th>
+          <th>Bài tập</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Ngực (Pectoralis)</td>
+          <td>Bench Press, Incline Press</td>
+        </tr>
+        <tr>
+          <td>Vai trước (Anterior deltoid)</td>
+          <td>OHP, Incline Press, Bench Press</td>
+        </tr>
+        <tr>
+          <td>Vai giữa (Lateral deltoid)</td>
+          <td>OHP</td>
+        </tr>
+        <tr>
+          <td>Tay sau (Triceps)</td>
+          <td>Bench Press, Incline Press, OHP</td>
+        </tr>
+      </tbody>
+    </table>
+  </details>
+
+  <details>
+    <summary>Pull</summary>
+    <table>
+      <thead>
+        <tr>
+          <th>Nhóm cơ</th>
+          <th>Bài tập</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Lưng rộng (Latissimus dorsi)</td>
+          <td>Pull-up, Lat Pulldown, Row</td>
+        </tr>
+        <tr>
+          <td>Lưng giữa (Rhomboids / Mid traps)</td>
+          <td>Barbell Row, Cable Row</td>
+        </tr>
+        <tr>
+          <td>Lưng dưới (Erector spinae)</td>
+          <td>Deadlift</td>
+        </tr>
+        <tr>
+          <td>Mông + Đùi sau (Glutes / Hamstrings)</td>
+          <td>Deadlift</td>
+        </tr>
+        <tr>
+          <td>Tay trước (Biceps)</td>
+          <td>Pull-up, Row, Cable Row</td>
+        </tr>
+      </tbody>
+    </table>
+  </details>
+</div>
   </div>
 
   <!-- TOAST -->
@@ -942,7 +1039,89 @@
     </div>
   </div>
 
+  <!-- USER INFO -->
+  <!-- <div class="user-card" id="userCard">
+    <div class="user-card-header">
+      <div class="avatar" id="userAvatar">—</div>
+      <div>
+        <div class="user-name" id="userName">—</div>
+        <div class="user-status"><span class="status-dot"></span> Đã xác thực</div>
+      </div>
+    </div>
+
+    <div class="user-info-row">
+      <span class="ui-label">USER ID</span>
+      <span class="ui-val" id="userId">—</span>
+    </div>
+    <div class="user-info-row">
+      <span class="ui-label">EMAIL</span>
+      <span class="ui-val" id="userEmail">—</span>
+    </div>
+    <div class="user-info-row">
+      <span class="ui-label">NGÀY TẠO</span>
+      <span class="ui-val" id="userCreated">—</span>
+    </div>
+  </div> -->
+
   <script>
+    /* ── AUTH GUARD ── */
+    (function() {
+      const token = localStorage.getItem('jwt');
+      if (!token) {
+        window.location.href = 'auth.html';
+        return;
+      }
+
+      // Verify token còn hạn (decode payload, không cần gọi API)
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        if (payload.exp * 1000 < Date.now()) {
+          localStorage.removeItem('jwt');
+          window.location.href = 'auth.html';
+        }
+      } catch {
+        localStorage.removeItem('jwt');
+        window.location.href = 'auth.html';
+      }
+    })();
+
+    function logout() {
+      localStorage.removeItem('jwt');
+      window.location.href = 'auth.html';
+    }
+
+    async function loadUserInfo(token) {
+      try {
+        const res = await fetch(`${API}/me`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (!res.ok) {
+          localStorage.removeItem('jwt');
+          return;
+        }
+
+        const user = await res.json();
+
+        document.getElementById('userAvatar').textContent = user.email[0].toUpperCase();
+        document.getElementById('userName').textContent = user.email;
+        document.getElementById('userId').textContent = user.id.slice(0, 8) + '...';
+        document.getElementById('userEmail').textContent = user.email;
+        document.getElementById('userCreated').textContent = new Date(user.createdAt).toLocaleDateString('vi-VN');
+        document.getElementById('tokenBox').textContent = token.slice(0, 40) + '...';
+        document.getElementById('tokenBox').dataset.full = token;
+
+        // Ẩn form, hiện user card
+        document.querySelector('.tabs').style.display = 'none';
+        document.querySelector('.form-body').style.display = 'none';
+        document.getElementById('userCard').classList.add('show');
+
+        showToast('Đăng nhập thành công', 'success');
+        setTimeout(() => { window.location.href = 'index.html'; }, 800);
+      } catch {
+        localStorage.removeItem('jwt');
+      }
+    }
 
     let _toastTimer = null;
     function showToast(msg, type = 'info', duration = 2200) {
@@ -1049,7 +1228,7 @@
       {
         id: 'push', label: 'Push', sub: 'T2', color: 'push',
         exercises: [
-          { id: 'bench', name: 'Barbell Bench Press', type: 'comp', schema: '4×5–8', sets: 4, note: 'Chính: Pectoralis major (ngực giữa và dưới). Phụ: Anterior deltoid (vai trước), Triceps brachii.Ổn định: Serratus anterior, Rotator cuff.' },
+          { id: 'bench', name: 'Bench Press', type: 'comp', schema: '4×5–8', sets: 4, note: 'Chính: Pectoralis major (ngực giữa và dưới). Phụ: Anterior deltoid (vai trước), Triceps brachii.Ổn định: Serratus anterior, Rotator cuff.' },
           { id: 'incline', name: 'Incline DB Press', type: 'comp', schema: '3×8–12', sets: 3, note: '30–45°. Nhắm upper chest. Chính: Pectoralis major phần upper (clavicular head). Phụ: Anterior deltoid, Triceps. Góc 30–45° càng cao thì vai trước tham gia càng nhiều, ngực càng ít' },
           { id: 'ohp', name: 'Overhead Press', type: 'comp', schema: '3×8–10', sets: 3, note: 'Barbell hoặc DB đứng/ngồi. Chính: Deltoid (cả 3 đầu, nhưng anterior và lateral chủ yếu). Phụ: Triceps, Upper trapezius, Serratus anterior. Ổn định: Rotator cuff, Core (đứng)' },
           { id: 'lateral', name: 'Lateral Raise', type: 'iso', schema: '3×12–15', sets: 3, note: 'Tạ đơn nhẹ, giữ 1 giây ở trên.' },
@@ -1064,9 +1243,9 @@
           { id: 'deadlift', name: 'Deadlift', type: 'comp', schema: '3×4–6', sets: 3, note: 'Conventional hoặc Romanian. Warm-up kỹ. Chính: Erector spinae (dựng cột sống), Gluteus maximus, Hamstrings. Phụ: Quadriceps, Latissimus dorsi, Trapezius (upper + mid), Rhomboids. Ổn định: Core toàn bộ, Forearm/grip. Lưu ý: Đây là bài full-body thực sự, không thuần pull — lý do đặt trong Pull day vì lưng là nhóm cơ chủ yếu' },
           { id: 'pullup', name: 'Pull-up / Lat Pulldown', type: 'comp', schema: '4×6–10', sets: 4, note: 'Pull-up nếu được; thêm tạ khi ≥12 reps. Chính: Latissimus dorsi (cánh lưng — tạo hình V). Phụ: Biceps brachii, Brachialis, Teres major. Ổn định: Rhomboids, Rear deltoid, Core' },
           { id: 'bbrow', name: 'Barbell Row', type: 'comp', schema: '3×8–10', sets: 3, note: 'Kiểm soát trọng tâm, không swing. Chính: Latissimus dorsi, Rhomboids, Middle trapezius. Phụ: Biceps, Rear deltoid, Erector spinae (giữ tư thế). So với Pulldown: Row kích thích mid-back (rhomboids, traps) nhiều hơn, Pulldown kích thích lat nhiều hơn.' },
-          { id: 'cablerow', name: 'Seated Cable Row', type: 'comp', schema: '3×10–12', sets: 3, note: 'Kéo về rốn, giữ 1 giây. Chính: Rhomboids, Middle trapezius, Latissimus dorsi. Phụ: Biceps, Rear deltoid. Tư thế ngồi cố định cho phép cô lập mid-back tốt hơn Barbell Row.' },
+          { id: 'cablerow', name: 'Seated Row', type: 'comp', schema: '3×10–12', sets: 3, note: 'Kéo về rốn, giữ 1 giây. Chính: Rhomboids, Middle trapezius, Latissimus dorsi. Phụ: Biceps, Rear deltoid. Tư thế ngồi cố định cho phép cô lập mid-back tốt hơn Barbell Row.' },
           { id: 'facepull', name: 'Face Pull', type: 'iso', schema: '3×15–20', sets: 3, note: 'Quan trọng cho sức khỏe vai.' },
-          { id: 'dbcurl', name: 'DB Hammer Curl', type: 'iso', schema: '3×10–12', sets: 3, note: 'Alternating hoặc hammer.' },
+          { id: 'dbcurl', name: 'Hammer Curl', type: 'iso', schema: '3×10–12', sets: 3, note: 'Alternating hoặc hammer.' },
           { id: 'ezbarwidecurl', name: 'EZ Bar Wide Curl', type: 'iso', schema: '3×10–12', sets: 3, note: 'Grip rộng nhắm long head.' },
           { id: 'ezbarnarrowcurl', name: 'EZ Bar Narrow Curl', type: 'iso', schema: '3×8–10', sets: 3, note: 'Grip hẹp nhắm short head.' },
           { id: 'preacher', name: 'Preacher Curl(EZ Bar, DB)', type: 'iso', schema: '3×10–12', sets: 3, note: 'Khuỷu tay cố định, không swing. Full ROM.' },
@@ -1104,6 +1283,53 @@
       }
     ];
 
+    const EQUIPMENT_LABELS = {
+      barbell: 'Barbell',
+      dumbbell: 'Dumbbell',
+      cable: 'Cable',
+      machine: 'Machine',
+      bodyweight: 'Bodyweight',
+      ezbar: 'EZ Bar'
+    };
+
+    const EQUIPMENT_OPTIONS = {
+      bench: ['barbell', 'dumbbell'],
+      incline: ['dumbbell', 'barbell', 'machine'],
+      ohp: ['barbell', 'dumbbell', 'machine'],
+      lateral: ['dumbbell', 'cable', 'machine'],
+      fly: ['cable', 'dumbbell', 'machine'],
+      pushdown: ['cable'],
+      triext: ['dumbbell', 'cable', 'ezbar'],
+      deadlift: ['barbell'],
+      pullup: ['bodyweight', 'cable', 'machine'],
+      bbrow: ['barbell', 'dumbbell', 'cable'],
+      cablerow: ['cable', 'machine'],
+      facepull: ['cable'],
+      dbcurl: ['dumbbell', 'cable'],
+      ezbarwidecurl: ['ezbar', 'barbell', 'cable'],
+      ezbarnarrowcurl: ['dumbbell', 'ezbar', 'cable'],
+      preacher: ['ezbar', 'dumbbell', 'machine'],
+      revcurl: ['ezbar', 'barbell', 'dumbbell'],
+      wristcurl: ['dumbbell', 'barbell'],
+      revwrist: ['dumbbell', 'barbell'],
+      farmer: ['dumbbell', 'barbell'],
+      squat: ['barbell', 'machine'],
+      rdl: ['barbell', 'dumbbell'],
+      legpress: ['machine'],
+      legext: ['machine'],
+      legcurl: ['machine'],
+      calf: ['machine', 'dumbbell', 'barbell'],
+      u_bench: ['dumbbell', 'barbell', 'machine'],
+      u_pull: ['bodyweight', 'cable', 'machine'],
+      u_ohp: ['dumbbell', 'barbell', 'machine'],
+      u_row: ['dumbbell', 'cable', 'machine'],
+      u_lat: ['dumbbell', 'cable', 'machine'],
+      u_arms: ['dumbbell', 'cable', 'ezbar'],
+      hammer: ['dumbbell', 'cable'],
+      concurl: ['dumbbell', 'cable'],
+      u_revcurl: ['ezbar', 'barbell', 'dumbbell']
+    };
+
     /* =====================================================
        STATE
        ===================================================== */
@@ -1113,6 +1339,7 @@
     let prevData = {};
     let historyOpen = false;
     let historyData = {};
+    let openCardIds = new Set();
 
     function getThisWeek() {
       const now = new Date();
@@ -1217,19 +1444,47 @@
     function switchDay(id) {
       currentDay = id;
       historyOpen = false;
+      openCardIds.clear();
       updateTabActive();
       loadDay();
     }
 
     function changeWeek(delta) {
       currentWeek = Math.max(1, Math.min(52, currentWeek + delta));
+      openCardIds.clear();
       updateWeekUI();
       loadDay();
     }
 
     function getDayExData(exId) {
       if (!dayData[exId]) dayData[exId] = { weight: '', reps: [], done: false };
+      if (!dayData[exId].reps) dayData[exId].reps = [];
+      if (dayData[exId].equipment === undefined) dayData[exId].equipment = '';
       return dayData[exId];
+    }
+
+    function getEquipmentOptions(ex) {
+      return EQUIPMENT_OPTIONS[ex.id] || ['barbell', 'dumbbell', 'cable'];
+    }
+
+    function renderEquipmentOptions(ex, data, dayColor) {
+      const options = getEquipmentOptions(ex);
+      const selected = data.equipment || '';
+      const color = `var(--${dayColor})`;
+
+      return `
+        <div class="equipment-row">
+          <span class="equipment-label">Thiết bị ${selected ? '' : '<span style="color:var(--hint);font-family:var(--sans);font-size:11px;">(chưa chọn)</span>'}</span>
+          <div class="equipment-options" style="--equipment-cols:${options.length};--active-color:${color};">
+            ${options.map(opt => `
+              <button type="button"
+                class="equipment-btn ${selected === opt ? 'active' : ''}"
+                onclick="setEquipment(event,'${ex.id}','${opt}')">
+                ${EQUIPMENT_LABELS[opt] || opt}
+              </button>
+            `).join('')}
+          </div>
+        </div>`;
     }
 
     function renderDay() {
@@ -1273,7 +1528,7 @@
     function renderExCard(ex, dayColor) {
       const data = getDayExData(ex.id);
       const prev = prevData[ex.id] || {};
-      const isOpen = !data.done;
+      const isOpen = openCardIds.has(ex.id);
       const isDone = data.done;
 
       let setsHtml = '';
@@ -1316,6 +1571,7 @@
     </div>`;
 
       const prevWeight = prev.weight ? `prev: ${prev.weight}kg` : '';
+      const prevEquipment = prev.equipment ? ` · ${EQUIPMENT_LABELS[prev.equipment] || prev.equipment}` : '';
       const poHint = computePoHint(ex, data, prev);
 
       return `
@@ -1332,13 +1588,14 @@
         <span class="ex-chevron">&#x25BE;</span>
       </div>
       <div class="ex-body">
+        ${renderEquipmentOptions(ex, data, dayColor)}
         <div class="weight-row">
           <span class="weight-label">Tạ</span>
           <input type="number" class="weight-input" value="${data.weight || ''}"
             placeholder="—" data-ex="${ex.id}"
             oninput="onWeightInput(this)">
           <span class="weight-unit">kg</span>
-          ${prevWeight ? `<span class="weight-prev">(${prevWeight})</span>` : ''}
+          ${prevWeight ? `<span class="weight-prev">(${prevWeight}${prevEquipment})</span>` : ''}
         </div>
         ${setsHtml}
         <div class="po-hint ${poHint.cls} ${poHint.msg ? 'show' : ''}" id="hint-${ex.id}">${poHint.msg}</div>
@@ -1388,6 +1645,7 @@
           if (!exd) return;
           const repsStr = (exd.reps || []).filter(r => r !== '' && r !== undefined).join(' / ') || '—';
           const wStr = exd.weight ? `${exd.weight}kg` : '—';
+          const equipmentStr = exd.equipment ? ` · ${EQUIPMENT_LABELS[exd.equipment] || exd.equipment}` : '';
           let delta = '';
           if (idx < weeks.length - 1) {
             const nextWk = weeks[idx + 1];
@@ -1398,7 +1656,7 @@
           }
           html += `<div class="history-week-row">
         <span class="hw-label">W${wk}</span>
-        <span class="hw-val">${wStr} — ${repsStr}</span>
+        <span class="hw-val">${wStr}${equipmentStr} — ${repsStr}</span>
         ${delta}
       </div>`;
         });
@@ -1413,7 +1671,9 @@
     function toggleCard(exId) {
       const card = document.getElementById('card-' + exId);
       if (!card) return;
-      card.classList.toggle('open');
+      const isOpen = card.classList.toggle('open');
+      if (isOpen) openCardIds.add(exId);
+      else openCardIds.delete(exId);
     }
 
     function toggleDone(event, exId) {
@@ -1428,6 +1688,13 @@
       const exId = input.dataset.ex;
       getDayExData(exId).weight = input.value;
       saveDay();
+    }
+
+    function setEquipment(event, exId, equipment) {
+      event.stopPropagation();
+      getDayExData(exId).equipment = equipment;
+      saveDay();
+      renderDay();
     }
 
     function onRepInput(input) {

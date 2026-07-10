@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Workout Tracker</title>
+<link rel="icon" type="image/x-icon" href="../favicon.ico">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0f0f0f; --surface: #181818; --surface2: #222222;
+    --border: #2a2a2a; --border2: #333; --text: #e8e8e8;
+    --muted: #999; --hint: #555;
+    --push: #a78bfa; --push-dim: #3b2f6b;
+    --success: #34d399; --success-dim: #0d2a20;
+    --error: #f87171; --error-dim: #2d1010;
+    --warn: #fbbf24;
+    --mono: 'DM Mono', monospace; --sans: 'DM Sans', sans-serif;
+  }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .container { width: 100%; max-width: 400px; }
+
+  /* Logo */
+  .logo {
+    text-align: center;
+    margin-bottom: 36px;
+  }
+  .logo-title {
+    font-family: var(--mono);
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: .1em;
+    color: var(--text);
+    text-transform: uppercase;
+  }
+  .logo-sub {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--hint);
+    margin-top: 4px;
+    letter-spacing: .06em;
+  }
+
+  /* Card */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  /* Tabs */
+  .tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border-bottom: 1px solid var(--border);
+  }
+  .tab-btn {
+    padding: 14px;
+    font-size: 12px;
+    font-weight: 500;
+    font-family: var(--sans);
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all .15s;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+  }
+  .tab-btn.active {
+    color: var(--push);
+    border-bottom-color: var(--push);
+    background: var(--surface);
+  }
+  .tab-btn:not(.active):hover { color: var(--text); }
+
+  /* Form */
+  .form-body { padding: 24px; }
+
+  .form-panel { display: none; }
+  .form-panel.active { display: block; }
+
+  .field { margin-bottom: 16px; }
+  .field label {
+    display: block;
+    font-size: 11px;
+    font-family: var(--mono);
+    color: var(--muted);
+    margin-bottom: 6px;
+    letter-spacing: .04em;
+  }
+  .field input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 13px;
+    font-family: var(--sans);
+    color: var(--text);
+    outline: none;
+    transition: border-color .15s;
+  }
+  .field input:focus { border-color: var(--push); }
+  .field input::placeholder { color: var(--hint); }
+  .field input.error { border-color: var(--error); }
+
+  .field-hint {
+    font-size: 11px;
+    color: var(--hint);
+    margin-top: 5px;
+  }
+
+  /* Submit button */
+  .btn-submit {
+    width: 100%;
+    padding: 11px;
+    background: var(--push);
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: var(--sans);
+    cursor: pointer;
+    transition: opacity .15s;
+    margin-top: 4px;
+    position: relative;
+  }
+  .btn-submit:hover { opacity: .88; }
+  .btn-submit:disabled { opacity: .45; cursor: not-allowed; }
+  .btn-submit .spinner {
+    display: none;
+    width: 14px; height: 14px;
+    border: 2px solid rgba(255,255,255,.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+    position: absolute; right: 14px; top: 50%;
+    transform: translateY(-50%);
+  }
+  .btn-submit.loading .spinner { display: block; }
+
+  @keyframes spin { to { transform: translateY(-50%) rotate(360deg); } }
+
+  /* Alert */
+  .alert {
+    padding: 10px 12px;
+    border-radius: 7px;
+    font-size: 12px;
+    margin-bottom: 16px;
+    display: none;
+    line-height: 1.5;
+  }
+  .alert.show { display: block; }
+  .alert.success { background: var(--success-dim); color: var(--success); border: 1px solid #1a4a35; }
+  .alert.error   { background: var(--error-dim);   color: var(--error);   border: 1px solid #4a1a1a; }
+  .alert.info    { background: var(--push-dim);    color: var(--push);    border: 1px solid #4a3a7a; }
+
+  /* User info card (after login) */
+  .user-card { display: none; padding: 24px; }
+  .user-card.show { display: block; }
+  .user-card-header {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 20px;
+  }
+  .avatar {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: var(--push-dim);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--mono); font-size: 14px; font-weight: 500;
+    color: var(--push); flex-shrink: 0;
+  }
+  .user-name { font-size: 13px; font-weight: 500; color: var(--text); }
+  .user-status {
+    font-family: var(--mono); font-size: 10px;
+    color: var(--success); margin-top: 2px;
+    display: flex; align-items: center; gap: 4px;
+  }
+  .status-dot {
+    width: 5px; height: 5px; border-radius: 50%;
+    background: var(--success);
+  }
+
+  .user-info-row {
+    display: flex; justify-content: space-between;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 12px;
+  }
+  .user-info-row:last-of-type { border-bottom: none; }
+  .ui-label { color: var(--muted); font-family: var(--mono); font-size: 11px; }
+  .ui-val { color: var(--text); font-family: var(--mono); font-size: 11px; }
+
+  .btn-logout {
+    display: block; width: 100%; margin-top: 8px;
+    padding: 10px; background: transparent;
+    border: 1px solid var(--border); border-radius: 8px;
+    color: var(--muted); font-size: 12px; font-family: var(--sans);
+    cursor: pointer; transition: all .15s;
+  }
+  .btn-logout:hover { border-color: var(--error); color: var(--error); }
+
+  /* Token display */
+  .token-box {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 6px; padding: 8px 10px;
+    font-family: var(--mono); font-size: 10px; color: var(--hint);
+    word-break: break-all; margin-top: 12px;
+    cursor: pointer; position: relative;
+  }
+  .token-box::after {
+    content: 'click để copy';
+    position: absolute; right: 8px; top: 50%;
+    transform: translateY(-50%);
+    font-size: 9px; color: var(--hint); opacity: .6;
+  }
+  .token-label {
+    font-family: var(--mono); font-size: 10px;
+    color: var(--hint); margin-top: 12px; margin-bottom: 4px;
+  }
+
+  /* Toast */
+  .toast {
+    position: fixed; bottom: 24px; left: 50%;
+    transform: translateX(-50%) translateY(8px);
+    background: var(--surface2); border: 1px solid var(--border2);
+    color: var(--text); font-family: var(--mono); font-size: 11px;
+    padding: 8px 16px; border-radius: 7px;
+    opacity: 0; pointer-events: none;
+    transition: opacity .2s, transform .2s;
+    white-space: nowrap; z-index: 100;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .toast.success { border-color: var(--success); color: var(--success); }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="logo">
+    <div class="logo-title">Workout Tracker</div>
+    <div class="logo-sub">PPL Program — Progressive Overload</div>
+  </div>
+
+  <div class="card" id="authCard">
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('login')">Đăng nhập</button>
+      <button class="tab-btn" onclick="switchTab('register')">Đăng ký</button>
+    </div>
+
+    <div class="form-body">
+      <!-- LOGIN -->
+      <div class="form-panel active" id="panel-login">
+        <div class="alert" id="login-alert"></div>
+        <div class="field">
+          <label>EMAIL</label>
+          <input type="email" id="login-email" placeholder="your@email.com" autocomplete="email">
+        </div>
+        <div class="field">
+          <label>MẬT KHẨU</label>
+          <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password">
+        </div>
+        <button class="btn-submit" id="login-btn" onclick="handleLogin()">
+          Đăng nhập
+          <span class="spinner"></span>
+        </button>
+      </div>
+
+      <!-- REGISTER -->
+      <div class="form-panel" id="panel-register">
+        <div class="alert" id="register-alert"></div>
+        <div class="field">
+          <label>EMAIL</label>
+          <input type="email" id="reg-email" placeholder="your@email.com" autocomplete="email">
+        </div>
+        <div class="field">
+          <label>MẬT KHẨU</label>
+          <input type="password" id="reg-password" placeholder="Tối thiểu 8 ký tự" autocomplete="new-password">
+          <div class="field-hint">Nên dùng chữ hoa, số và ký tự đặc biệt</div>
+        </div>
+        <div class="field">
+          <label>XÁC NHẬN MẬT KHẨU</label>
+          <input type="password" id="reg-confirm" placeholder="Nhập lại mật khẩu" autocomplete="new-password">
+        </div>
+        <button class="btn-submit" id="register-btn" onclick="handleRegister()">
+          Tạo tài khoản
+          <span class="spinner"></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- USER INFO -->
+    <div class="user-card" id="userCard">
+      <div class="user-card-header">
+        <div class="avatar" id="userAvatar">—</div>
+        <div>
+          <div class="user-name" id="userName">—</div>
+          <div class="user-status"><span class="status-dot"></span> Đã xác thực</div>
+        </div>
+      </div>
+
+      <div class="user-info-row">
+        <span class="ui-label">USER ID</span>
+        <span class="ui-val" id="userId">—</span>
+      </div>
+      <div class="user-info-row">
+        <span class="ui-label">EMAIL</span>
+        <span class="ui-val" id="userEmail">—</span>
+      </div>
+      <div class="user-info-row">
+        <span class="ui-label">NGÀY TẠO</span>
+        <span class="ui-val" id="userCreated">—</span>
+      </div>
+
+      <div class="token-label">JWT TOKEN</div>
+      <div class="token-box" id="tokenBox" onclick="copyToken()"></div>
+
+      <a href="index.html" class="btn-goto">Vào Workout Tracker &rarr;</a>
+      <button class="btn-logout" onclick="handleLogout()">Đăng xuất</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const API = 'http://localhost:5142/api/auth';
+
+  /* ── UTILS ── */
+  let _toastTimer;
+  function showToast(msg, type = '') {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.className = `toast ${type} show`;
+    clearTimeout(_toastTimer);
+    _toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
+  }
+
+  function showAlert(id, msg, type) {
+    const el = document.getElementById(id);
+    el.textContent = msg;
+    el.className = `alert ${type} show`;
+  }
+
+  function hideAlert(id) {
+    document.getElementById(id).className = 'alert';
+  }
+
+  function setLoading(btnId, loading) {
+    const btn = document.getElementById(btnId);
+    btn.disabled = loading;
+    btn.classList.toggle('loading', loading);
+  }
+
+  /* ── TABS ── */
+  function switchTab(tab) {
+    document.querySelectorAll('.tab-btn').forEach((b, i) => {
+      b.classList.toggle('active', (tab === 'login' && i === 0) || (tab === 'register' && i === 1));
+    });
+    document.getElementById('panel-login').classList.toggle('active', tab === 'login');
+    document.getElementById('panel-register').classList.toggle('active', tab === 'register');
+    hideAlert('login-alert');
+    hideAlert('register-alert');
+  }
+
+  /* ── LOGIN ── */
+  async function handleLogin() {
+    const email = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-password').value;
+
+    if (!email || !password) {
+      showAlert('login-alert', 'Vui lòng nhập đầy đủ email và mật khẩu.', 'error');
+      return;
+    }
+
+    setLoading('login-btn', true);
+    hideAlert('login-alert');
+
+    try {
+      const res = await fetch(`${API}/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        showAlert('login-alert', data.message || 'Đăng nhập thất bại.', 'error');
+        return;
+      }
+
+      localStorage.setItem('jwt', data.token);
+      // await loadUserInfo(data.token);
+      setTimeout(() => { window.location.href = 'index.html'; }, 800);
+    } catch {
+      showAlert('login-alert', 'Không kết nối được server. Kiểm tra API đang chạy.', 'error');
+    } finally {
+      setLoading('login-btn', false);
+    }
+  }
+
+  /* ── REGISTER ── */
+  async function handleRegister() {
+    const email = document.getElementById('reg-email').value.trim();
+    const password = document.getElementById('reg-password').value;
+    const confirm = document.getElementById('reg-confirm').value;
+
+    if (!email || !password || !confirm) {
+      showAlert('register-alert', 'Vui lòng nhập đầy đủ thông tin.', 'error');
+      return;
+    }
+
+    if (password.length < 8) {
+      showAlert('register-alert', 'Mật khẩu phải có ít nhất 8 ký tự.', 'error');
+      return;
+    }
+
+    if (password !== confirm) {
+      showAlert('register-alert', 'Mật khẩu xác nhận không khớp.', 'error');
+      document.getElementById('reg-confirm').classList.add('error');
+      return;
+    }
+
+    document.getElementById('reg-confirm').classList.remove('error');
+    setLoading('register-btn', true);
+    hideAlert('register-alert');
+
+    try {
+      const res = await fetch(`${API}/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        showAlert('register-alert', data.message || 'Đăng ký thất bại.', 'error');
+        return;
+      }
+
+      showAlert('register-alert', 'Đăng ký thành công! Kiểm tra email để xác nhận tài khoản.', 'success');
+      document.getElementById('reg-email').value = '';
+      document.getElementById('reg-password').value = '';
+      document.getElementById('reg-confirm').value = '';
+
+    } catch {
+      showAlert('register-alert', 'Không kết nối được server.', 'error');
+    } finally {
+      setLoading('register-btn', false);
+    }
+  }
+
+  /* ── LOAD USER INFO ── */
+  async function loadUserInfo(token) {
+    try {
+      const res = await fetch(`${API}/me`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (!res.ok) {
+        localStorage.removeItem('jwt');
+        return;
+      }
+
+      const user = await res.json();
+
+      document.getElementById('userAvatar').textContent = user.email[0].toUpperCase();
+      document.getElementById('userName').textContent = user.email;
+      document.getElementById('userId').textContent = user.id.slice(0, 8) + '...';
+      document.getElementById('userEmail').textContent = user.email;
+      document.getElementById('userCreated').textContent = new Date(user.createdAt).toLocaleDateString('vi-VN');
+      document.getElementById('tokenBox').textContent = token.slice(0, 40) + '...';
+      document.getElementById('tokenBox').dataset.full = token;
+
+      // Ẩn form, hiện user card
+      document.querySelector('.tabs').style.display = 'none';
+      document.querySelector('.form-body').style.display = 'none';
+      document.getElementById('userCard').classList.add('show');
+
+      showToast('Đăng nhập thành công', 'success');
+      setTimeout(() => { window.location.href = 'index.html'; }, 800);
+
+    } catch {
+      localStorage.removeItem('jwt');
+    }
+  }
+
+  /* ── LOGOUT ── */
+  function handleLogout() {
+    localStorage.removeItem('jwt');
+    document.querySelector('.tabs').style.display = '';
+    document.querySelector('.form-body').style.display = '';
+    document.getElementById('userCard').classList.remove('show');
+    showToast('Đã đăng xuất');
+  }
+
+  /* ── COPY TOKEN ── */
+  function copyToken() {
+    const full = document.getElementById('tokenBox').dataset.full;
+    navigator.clipboard.writeText(full)
+      .then(() => showToast('Đã copy JWT token', 'success'));
+  }
+
+  /* ── ENTER KEY ── */
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return;
+    const loginActive = document.getElementById('panel-login').classList.contains('active');
+    if (loginActive) handleLogin();
+    else handleRegister();
+  });
+
+  /* ── AUTO LOGIN nếu đã có token ── */
+  const saved = localStorage.getItem('jwt');
+  if (saved) loadUserInfo(saved);
+</script>
+</body>
+</html>
