@@ -83,6 +83,49 @@
 				color: var(--text);
 			}
 
+			.header-wrapper {
+				    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+			}
+
+			.header-btn {
+				font-size: 10px;
+				color: var(--hint);
+				margin-top: 5px;
+				display: flex;
+				gap: 8px;
+				align-items: center;
+			}
+
+			.logout-btn {
+				font-size: 11px;
+							background: none;
+							align-self: flex-end;
+							border: 1px solid var(--border2);
+							color: var(--muted);
+							cursor: pointer;
+							padding: 3px 10px;
+							border-radius: 5px;
+							font-family: var(--sans);
+			}
+			#toggleBtn {
+				display: none;
+				width: 28px;
+				height: 28px;
+				border-radius: 6px;
+				border: 1px solid var(--border2);
+				background: transparent;
+				color: var(--muted);
+				cursor: pointer;
+				font-size: 16px;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+			}
+
 			.header-week {
 				font-family: var(--mono);
 				font-size: 11px;
@@ -834,7 +877,7 @@
 			}
 
 			#work-out-note {
-				padding: 12px 25px;
+				padding: 15px;
 			}
 
 			#work-out-note .ex-header {
@@ -913,13 +956,30 @@
 					margin-bottom: 14px;
 				}
 
+				.header-controls-hidden #headerControls,
+				.header-controls-hidden #storageBadge,
+				.header-controls-hidden .logout-btn,
+				.header-controls-hidden .header-btn {
+					display: none !important;
+				}
+
+				.header-controls-hidden .header-wrapper {
+					margin-top: 15px;
+				}
+
+				#toggleBtn {
+					display: block;
+					position: absolute;
+        top: 15px;
+        right: 15px;
+				}
+
 				.day-tabs {
 					padding: 12px 16px 8px;
 				}
 
 				.header-wrapper {
-					flex-direction: column;
-					gap: 15px;
+					gap: 12px;
 				}
 
 				.header-wrapper .cf-badge {
@@ -965,10 +1025,7 @@
 				<div>
 					<div class="header-title">Workout Tracker</div>
 					<div class="header-week" id="headerWeek"></div>
-					<div
-						class="header-btn"
-						style="font-size: 10px; color: var(--hint); margin-top: 5px; display: flex; gap: 8px; align-items: center"
-					>
+					<div class="header-btn">
 						<span style="font-family: var(--mono); color: var(--hint)"
 							>ID: <span id="userIdDisplay" style="color: var(--muted)">—</span></span
 						>
@@ -1004,21 +1061,11 @@
 						</button>
 					</div>
 				</div>
-				<div class="header-wrapper" style="display: flex; flex-direction: column; flex-wrap: wrap; align-items: center; gap: 12px">
-					<button
-						onclick="logout()"
-						style="
-							font-size: 11px;
-							background: none;
-							align-self: flex-end;
-							border: 1px solid var(--border2);
-							color: var(--muted);
-							cursor: pointer;
-							padding: 3px 10px;
-							border-radius: 5px;
-							font-family: var(--sans);
-						"
-					>
+				<div class="header-wrapper">
+					<button onclick="toggleHeaderControls()" id="toggleBtn">
+						&#9776;
+					</button>
+					<button class="logout-btn" onclick="logout()">
 						Logout
 					</button>
 					<span class="cf-badge" id="storageBadge">
@@ -1216,6 +1263,13 @@
 				_toastTimer = setTimeout(() => {
 					el.classList.remove('show');
 				}, duration);
+			}
+
+			function toggleHeaderControls() {
+				document.querySelector('.header').classList.toggle('header-controls-hidden');
+				const btn = document.getElementById('toggleBtn');
+				const hidden = document.querySelector('.header').classList.contains('header-controls-hidden');
+				btn.textContent = hidden ? '✕' : '☰';
 			}
 
 			/* =====================================================
