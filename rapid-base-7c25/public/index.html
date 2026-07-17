@@ -84,11 +84,11 @@
 			}
 
 			.header-wrapper {
-				    display: flex;
-    flex-direction: column;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 12px;
+				display: flex;
+				flex-direction: column;
+				flex-wrap: wrap;
+				align-items: center;
+				gap: 12px;
 			}
 
 			.header-btn {
@@ -102,17 +102,18 @@
 
 			.logout-btn {
 				font-size: 11px;
-							background: none;
-							align-self: flex-end;
-							border: 1px solid var(--border2);
-							color: var(--muted);
-							cursor: pointer;
-							padding: 3px 10px;
-							border-radius: 5px;
-							font-family: var(--sans);
+				background: none;
+				align-self: flex-end;
+				border: 1px solid var(--border2);
+				color: var(--muted);
+				cursor: pointer;
+				padding: 3px 10px;
+				border-radius: 5px;
+				font-family: var(--sans);
 			}
+
 			#toggleBtn {
-				display: none;
+				display: none !important;
 				width: 28px;
 				height: 28px;
 				border-radius: 6px;
@@ -902,14 +903,15 @@
 				border-spacing: 0 6px;
 				width: 100%;
 			}
-			
-			#work-out-note  {
+
+			#work-out-note {
 				.ex-body {
-					thead, tbody, tr {
+					thead,
+					tbody,
+					tr {
 						width: 100%;
 					}
 				}
-				
 			}
 
 			#work-out-note thead {
@@ -951,11 +953,6 @@
 					padding: 14px 16px;
 				}
 
-				.header .header-btn {
-					justify-content: space-between;
-					margin-bottom: 14px;
-				}
-
 				.header-controls-hidden #headerControls,
 				.header-controls-hidden #storageBadge,
 				.header-controls-hidden .logout-btn,
@@ -968,10 +965,10 @@
 				}
 
 				#toggleBtn {
-					display: block;
+					display: block !important;
 					position: absolute;
-        top: 15px;
-        right: 15px;
+					top: 15px;
+					right: 15px;
 				}
 
 				.day-tabs {
@@ -1062,12 +1059,8 @@
 					</div>
 				</div>
 				<div class="header-wrapper">
-					<button onclick="toggleHeaderControls()" id="toggleBtn">
-						&#9776;
-					</button>
-					<button class="logout-btn" onclick="logout()">
-						Logout
-					</button>
+					<button onclick="toggleHeaderControls()" id="toggleBtn">&#9776;</button>
+					<button class="logout-btn" onclick="logout()">Logout</button>
 					<span class="cf-badge" id="storageBadge">
 						<span class="cf-dot local" id="storageDot"></span>
 						<span id="storageLabel" style="color: #fff">localStorage</span>
@@ -1084,7 +1077,7 @@
 			<div id="dayContent"></div>
 
 			<div id="work-out-note">
-        <p style="margin-bottom: 7.5px;">Ghi chú các bài tập:</p>
+				<p style="margin-bottom: 7.5px">Ghi chú các bài tập:</p>
 				<details class="ex-card">
 					<summary class="ex-header">Push</summary>
 					<table class="ex-body">
@@ -1273,8 +1266,8 @@
 			}
 
 			/* =====================================================
-       MODAL
-       ===================================================== */
+		 MODAL
+		 ===================================================== */
 			function openModal() {
 				document.getElementById('modalCurrentId').textContent = Storage._userId || '—';
 				document.getElementById('modalInput').value = '';
@@ -1305,8 +1298,8 @@
 			}
 
 			/* =====================================================
-       STORAGE LAYER — swap này để chuyển sang CF Worker
-       ===================================================== */
+		 STORAGE LAYER — swap này để chuyển sang CF Worker
+		 ===================================================== */
 			const Storage = {
 				_workerUrl: 'https://workout-tracker.vuhuuvan-kc.workers.dev',
 				_userId: null,
@@ -1366,8 +1359,8 @@
 				},
 			};
 			/* =====================================================
-       DỮ LIỆU BÀI TẬP
-       ===================================================== */
+		 DỮ LIỆU BÀI TẬP
+		 ===================================================== */
 			const DAYS = [
 				{
 					id: 'push',
@@ -1620,8 +1613,8 @@
 			};
 
 			/* =====================================================
-       STATE
-       ===================================================== */
+		 STATE
+		 ===================================================== */
 			let currentWeek = getThisWeek();
 			let currentDay = 'push';
 			let dayData = {}; // { exId: { weight, reps:[n,...], done:bool } }
@@ -1675,8 +1668,8 @@
 			}
 
 			/* =====================================================
-       RENDER
-       ===================================================== */
+		 RENDER
+		 ===================================================== */
 			function renderUserId() {
 				const el = document.getElementById('userIdDisplay');
 				if (!el) return;
@@ -1965,8 +1958,8 @@
 			}
 
 			/* =====================================================
-       EVENT HANDLERS
-       ===================================================== */
+		 EVENT HANDLERS
+		 ===================================================== */
 			function toggleCard(exId) {
 				const card = document.getElementById('card-' + exId);
 				if (!card) return;
@@ -2048,8 +2041,8 @@
 			}
 
 			/* =====================================================
-       BOOT
-       ===================================================== */
+		 BOOT
+		 ===================================================== */
 			init();
 		</script>
 	</body>
